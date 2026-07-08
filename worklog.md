@@ -92,3 +92,23 @@ Stage Summary:
 - Karto now uses 120 real grocery product photos across all 100 products + 15 categories.
 - Premium Blinkit/Zepto-inspired design: real images, cleaner cards, delivery badges, rating pills, better hero.
 - Lint clean, no errors, all images load successfully from stable OSS CDN.
+
+---
+Task ID: 5
+Agent: Main (Z.ai Code)
+Task: Fix category navbar taking too much vertical space due to long category names.
+
+Work Log:
+- Used VLM to analyze the user's screenshot: confirmed the navbar was cramped with long names like "Cleaning Essentials", "Frozen Foods", "Personal Care" causing uneven spacing.
+- Added a `short` field to Category type with compact labels: Veggies, Drinks, Personal, Baby, Cleaning, Frozen, Instant, Pharmacy, Electronics, Home (kept short ones as-is).
+- Redesigned the desktop category navbar:
+  * Shows ALL 15 categories (was limited to 11) with short labels.
+  * Horizontally scrollable with hidden scrollbar (hide-scrollbar) so nothing wraps.
+  * Tightened spacing: gap-0.5, px-2.5, py-1, text-xs (was gap-1, px-3, py-1.5).
+  * Reduced emoji size, "All →" instead of "View all →".
+- Navbar height reduced from ~49px to 37px. Total header height reduced from ~147px to 135px.
+- VLM re-verified: "all category names fit on one line without wrapping, vertical spacing is tight and clean."
+- Lint passes clean (0 errors).
+
+Stage Summary:
+- Category navbar is now compact, single-line, horizontally scrollable showing all 15 categories with short labels. No more excessive vertical space.

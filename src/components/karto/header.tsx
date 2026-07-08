@@ -187,29 +187,29 @@ export function Header() {
           </div>
         </div>
 
-        {/* category nav (desktop) */}
+        {/* category nav (desktop) — horizontally scrollable, compact */}
         <nav className="hidden border-t border-border md:block">
-          <div className="mx-auto flex max-w-7xl items-center gap-1 px-6 py-1.5">
-            {categories.slice(0, 11).map((c) => (
+          <div className="hide-scrollbar mx-auto flex max-w-7xl items-center gap-0.5 overflow-x-auto px-4 py-1">
+            {categories.map((c) => (
               <button
                 key={c.id}
                 onClick={() => handleCategoryClick(c.id)}
                 className={cn(
-                  "flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition",
+                  "flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium transition",
                   selectedCategory === c.id
                     ? "bg-karto-green/10 text-karto-green"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <span>{c.emoji}</span>
-                {c.name}
+                <span className="text-sm">{c.emoji}</span>
+                {c.short}
               </button>
             ))}
             <button
               onClick={() => scrollToSection("catalog")}
-              className="ml-auto whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold text-karto-green hover:bg-karto-green/10"
+              className="ml-1 shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold text-karto-green hover:bg-karto-green/10"
             >
-              View all →
+              All →
             </button>
           </div>
         </nav>
