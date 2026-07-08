@@ -137,3 +137,30 @@ Stage Summary:
 - Geolocation "Detect my location" works via browser API + reverse geocoding (header + hero).
 - Best deals/offers promo strip is now at the very top, right below the hero.
 - Section order optimized: deals and best sellers surface early.
+
+---
+Task ID: 7
+Agent: Main (Z.ai Code)
+Task: Fix hero right-side clutter (overlapping chips/labels) and make search carry the query instead of opening an empty second search bar.
+
+Work Log:
+- VLM analysis confirmed: floating product chips ("Royal Gala Apples ₹189 4.8") overlapped the category tiles, and "Delivered in 10 mins" badge overlapped the top image. Category labels showed as lowercase/duplicated-looking ("fruitsfruits").
+- Store: added `searchInitialQuery` UI state + `openSearch(query?)` action so any search bar can open the modal pre-filled with a query.
+- SearchModal: reads `searchInitialQuery` on open, pre-fills the input, places cursor at end, and shows results immediately. No more "type in hero → opens empty modal → retype" flow.
+- Hero redesigned right side (clean, no overlap):
+  * Removed the floating product chips that overlapped the category grid.
+  * Feature image with "Delivered in 10 mins" badge sits in its own rounded container (no overlap).
+  * 2x2 category tiles use proper capitalized names (Fruits/Dairy/Snacks/Bakery) from categories data, clickable → scrolls to catalog filtered by that category.
+  * Added a compact "Trending" strip below the tiles showing 2 real product thumbnails with name+price (clickable → opens product modal).
+- Header search: replaced the search BUTTON (that opened an empty modal) with a real inline INPUT. Typing + Enter carries the query into the modal via openSearch(query). Added a clear (X) button when there's text. Mobile drawer search also uses openSearch().
+- Removed unused setSearchOpen from header.
+- Lint passes clean (0 errors).
+- Agent Browser verified:
+  * VLM confirms right side is clean — no overlapping chips, labels clear, "Delivered in 10 mins" properly positioned.
+  * Hero search "milk" → modal opens pre-filled with "milk" → milk products show immediately.
+  * Header search "bread" → modal opens pre-filled with "bread" → bread products show.
+  * No console/hydration errors.
+
+Stage Summary:
+- Hero right side is clean and uncluttered (feature image + 2x2 category tiles + trending strip, no overlapping elements).
+- Search is now one continuous flow: type in hero OR header search bar → query carries into the search modal → results show immediately. No more redundant empty second search bar.

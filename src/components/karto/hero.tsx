@@ -1,18 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search, MapPin, Clock, ShieldCheck, Zap, Star, Navigation, Loader2, TrendingUp } from "lucide-react";
+import { Search, MapPin, Clock, ShieldCheck, Zap, Navigation, Loader2, TrendingUp, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useStore } from "@/components/karto/store";
 import { products } from "@/data/products";
 import { analytics } from "@/lib/analytics";
-import { formatPrice } from "@/lib/format";
 import { detectLocation } from "@/lib/geo";
 import { categoryImages } from "@/data/image-map";
+import { categories } from "@/data/categories";
+import { formatPrice } from "@/lib/format";
 
 export function Hero() {
-  const setSearchOpen = useStore((s) => s.setSearchOpen);
+  const openSearch = useStore((s) => s.openSearch);
   const location = useStore((s) => s.location);
   const setLocation = useStore((s) => s.setLocation);
   const [q, setQ] = useState("");
@@ -21,7 +22,7 @@ export function Hero() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     analytics.search(q);
-    setSearchOpen(true);
+    openSearch(q); // carry the query into the search modal
   };
 
   const handleDetect = async () => {
@@ -40,13 +41,13 @@ export function Hero() {
     }
   };
 
-  // floating preview products with real images
-  const floats = [products[0], products[8], products[18], products[40]];
-  // 4 category tiles for the right grid
-  const catTiles = ["fruits", "dairy", "snacks", "bakery"].map((c) => ({
-    id: c,
-    img: categoryImages[c],
-  }));
+  // 4 category tiles for the right grid — pick ones with good images
+  const catTiles = (["fruits", "dairy", "snacks", "bakery"] as const)
+    .map((id) => categories.find((c) => c.id === id)!)
+    .filter(Boolean);
+
+  // a couple of trending products to show as a strip
+  const trending = [products[0], products[18]];
 
   return (
     <section className="relative overflow-hidden border-b border-border bg-foreground text-background">
@@ -105,9 +106,9 @@ export function Hero() {
               />
               <button
                 type="submit"
-                className="shrink-0 rounded-xl bg-karto-green px-5 py-2.5 text-sm font-bold text-white transition hover:bg-karto-green/90 active:scale-95"
+                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-karto-green px-5 py-2.5 text-sm font-bold text-white transition hover:bg-karto-green/90 active:scale-95"
               >
-                Search
+                Search <ArrowRight className="h-4 w-4" />
               </button>
             </motion.form>
 
@@ -157,89 +158,94 @@ export function Hero() {
             </motion.div>
           </div>
 
-          {/* RIGHT — modern visual grid (span 5) */}
+          {/* RIGHT — clean visual: feature image + category tiles + trending strip */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative lg:col-span-5"
           >
-            <div className="grid grid-cols-2 gap-3">
-              {/* large feature image */}
-              <div className="relative col-span-2 overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-                <div className="aspect-[16/9] w-full">
-                  <img
-                    src="/karto/hero.png"
-                    alt="Fresh groceries delivered by Karto"
-                    className="h-full w-full object-cover"
-                    onError={(e) => { e.currentTarget.style.display = "none"; }}
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 }}
-                  className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-karto-green px-3.5 py-2 text-sm font-bold text-white shadow-lg"
-                >
-                  <Clock className="h-4 w-4 fill-white" />
-                  Delivered in 10 mins
-                </motion.div>
+            {/* large feature image */}
+            <div className="relative mb-3 overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
+              <div className="aspect-[16/10] w-full">
+                <img
+                  src="/karto/hero.png"
+                  alt="Fresh groceries delivered by Karto"
+                  className="h-full w-full object-cover"
+                  onError={(e) => { e.currentTarget.style.display = "none"; }}
+                />
               </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-transparent" />
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-karto-green px-3.5 py-2 text-sm font-bold text-white shadow-lg"
+              >
+                <Clock className="h-4 w-4 fill-white" />
+                Delivered in 10 mins
+              </motion.div>
+            </div>
 
-              {/* 2x2 category tiles */}
+            {/* 2x2 category tiles — clean, labeled, no overlap */}
+            <div className="grid grid-cols-2 gap-3">
               {catTiles.map((c, i) => (
-                <motion.div
+                <motion.button
                   key={c.id}
-                  initial={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.4 + i * 0.1, type: "spring", stiffness: 200 }}
-                  className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 shadow-lg"
+                  transition={{ delay: 0.4 + i * 0.08, type: "spring", stiffness: 200 }}
+                  whileHover={{ y: -3 }}
+                  onClick={() => {
+                    useStore.getState().setSelectedCategory(c.id);
+                    document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/10 shadow-lg"
                 >
-                  {c.img && (
+                  {c.image && (
                     <img
-                      src={c.img}
-                      alt={c.id}
+                      src={c.image}
+                      alt={c.name}
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                       onError={(e) => { e.currentTarget.style.display = "none"; }}
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent" />
-                  <span className="absolute bottom-2 left-2.5 text-xs font-bold capitalize text-white drop-shadow">
-                    {c.id.replace("-", " ")}
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/10 to-transparent" />
+                  <span className="absolute bottom-2 left-2.5 text-sm font-bold text-white drop-shadow">
+                    {c.name}
                   </span>
-                </motion.div>
+                </motion.button>
               ))}
             </div>
 
-            {/* floating product chips */}
-            {floats.slice(0, 2).map((p, i) => {
-              const pos = ["-left-3 top-1/3", "-right-3 bottom-10"][i];
-              return (
-                <motion.div
-                  key={p.id}
-                  initial={{ opacity: 0, x: i === 0 ? -20 : 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.9 + i * 0.15 }}
-                  className={`absolute ${pos} hidden items-center gap-2 rounded-2xl border border-white/10 bg-background/95 p-1.5 pr-3 text-foreground shadow-xl backdrop-blur xl:flex`}
-                >
-                  <div className="h-10 w-10 overflow-hidden rounded-xl bg-muted/30">
-                    {p.image && (
-                      <img src={p.image} alt={p.name} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-                    )}
-                  </div>
-                  <div className="leading-tight">
-                    <p className="max-w-24 truncate text-xs font-semibold">{p.name}</p>
-                    <div className="flex items-center gap-1">
-                      <p className="text-xs font-bold text-karto-green">{formatPrice(p.price)}</p>
-                      <span className="flex items-center gap-0.5 text-[10px] text-amber-500">
-                        <Star className="h-2 w-2 fill-amber-400" />{p.rating.toFixed(1)}
-                      </span>
+            {/* trending strip */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.85 }}
+              className="mt-3 flex items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur"
+            >
+              <span className="flex items-center gap-1 pl-1.5 text-[11px] font-bold uppercase tracking-wide text-karto-green">
+                <TrendingUp className="h-3.5 w-3.5" /> Trending
+              </span>
+              <div className="flex flex-1 gap-2 overflow-hidden">
+                {trending.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => useStore.getState().openProduct(p.id)}
+                    className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-white/5 p-1.5 transition hover:bg-white/10"
+                  >
+                    <div className="h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-muted/30">
+                      {p.image && <img src={p.image} alt={p.name} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                    <div className="min-w-0 leading-tight">
+                      <p className="truncate text-xs font-semibold text-white">{p.name}</p>
+                      <p className="text-xs font-bold text-karto-green">{formatPrice(p.price)}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

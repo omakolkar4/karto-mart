@@ -73,6 +73,7 @@ type UIState = {
   lastOrder: Order | null;
   selectedCategory: string | null;
   location: string;
+  searchInitialQuery: string;
 };
 
 type StoreState = UIState & {
@@ -89,6 +90,7 @@ type StoreState = UIState & {
   setCartOpen: (v: boolean) => void;
   setWishlistOpen: (v: boolean) => void;
   setSearchOpen: (v: boolean) => void;
+  openSearch: (query?: string) => void;
   setAuthOpen: (v: boolean) => void;
   setAccountOpen: (v: boolean) => void;
   setCheckoutOpen: (v: boolean) => void;
@@ -149,6 +151,7 @@ export const useStore = create<StoreState>()(
       lastOrder: null,
       selectedCategory: null,
       location: DEFAULT_LOCATION,
+      searchInitialQuery: "",
       _hasHydrated: false,
 
       cart: [],
@@ -161,6 +164,7 @@ export const useStore = create<StoreState>()(
       setCartOpen: (v) => set({ cartOpen: v }),
       setWishlistOpen: (v) => set({ wishlistOpen: v }),
       setSearchOpen: (v) => set({ searchOpen: v }),
+      openSearch: (query) => set({ searchOpen: true, searchInitialQuery: query ?? "" }),
       setAuthOpen: (v) => set({ authOpen: v }),
       setAccountOpen: (v) => set({ accountOpen: v }),
       setCheckoutOpen: (v) => set({ checkoutOpen: v }),

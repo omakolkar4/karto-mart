@@ -15,6 +15,7 @@ type Sort = "popular" | "price-asc" | "price-desc" | "rating";
 export function SearchModal() {
   const open = useStore((s) => s.searchOpen);
   const setOpen = useStore((s) => s.setSearchOpen);
+  const initialQuery = useStore((s) => s.searchInitialQuery);
   const openProduct = useStore((s) => s.openProduct);
 
   const [q, setQ] = useState("");
@@ -28,14 +29,21 @@ export function SearchModal() {
 
   useEffect(() => {
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    } else {
-      // Reset filters when the modal closes. setState-in-effect is acceptable here
-      // because it synchronizes local UI state with the open/close lifecycle.
+      // Pre-fill with the query passed from the hero / header search bar
+      // so it feels like one continuous search, not two separate inputs.
       // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQ(initialQuery);
+      setTimeout(() => {
+        inputRef.current?.focus();
+        // place cursor at end
+        const len = initialQuery.length;
+        inputRef.current?.setSelectionRange(len, len);
+      }, 120);
+    } else {
+      // Reset filters when the modal closes.
       setQ(""); setCat(null); setBrand(null); setMaxPrice(2000); setMinRating(0); setSort("popular"); setShowFilters(false);
     }
-  }, [open]);
+  }, [open, initialQuery]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };

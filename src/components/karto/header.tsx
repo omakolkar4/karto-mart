@@ -19,7 +19,7 @@ export function Header() {
   const user = useStore((s) => s.user);
   const setCartOpen = useStore((s) => s.setCartOpen);
   const setWishlistOpen = useStore((s) => s.setWishlistOpen);
-  const setSearchOpen = useStore((s) => s.setSearchOpen);
+  const openSearch = useStore((s) => s.openSearch);
   const setAuthOpen = useStore((s) => s.setAuthOpen);
   const setAccountOpen = useStore((s) => s.setAccountOpen);
   const setContactOpen = useStore((s) => s.setContactOpen);
@@ -33,6 +33,7 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [detecting, setDetecting] = useState(false);
+  const [headerQuery, setHeaderQuery] = useState("");
   // Stable search placeholder to avoid hydration mismatch; rotated client-side only.
   const [placeholder, setPlaceholder] = useState("fresh fruits");
 
@@ -148,16 +149,25 @@ export function Header() {
             </div>
           </button>
 
-          {/* search (desktop) */}
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="group mx-1 flex h-11 flex-1 items-center gap-3 rounded-full border border-border bg-card px-4 text-sm text-muted-foreground transition hover:border-karto-green/50 hover:shadow-sm"
+          {/* search (desktop) — inline input that carries the query into the search modal */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); openSearch(headerQuery); }}
+            className="group mx-1 flex h-11 flex-1 items-center gap-2 rounded-full border border-border bg-card px-4 transition hover:border-karto-green/50 focus-within:border-karto-green focus-within:shadow-sm"
           >
-            <Search className="h-4 w-4 text-muted-foreground group-hover:text-karto-green" />
-            <span className="truncate">
-              Search for <span className="text-foreground">"{placeholder}"</span>...
-            </span>
-          </button>
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground group-focus-within:text-karto-green" />
+            <input
+              value={headerQuery}
+              onChange={(e) => setHeaderQuery(e.target.value)}
+              placeholder={`Search "${placeholder}"...`}
+              className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              aria-label="Search products"
+            />
+            {headerQuery && (
+              <button type="button" onClick={() => setHeaderQuery("")} className="text-muted-foreground hover:text-foreground" aria-label="Clear">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </form>
 
           {/* right actions */}
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
@@ -270,7 +280,7 @@ export function Header() {
 
               <div className="flex-1 overflow-y-auto p-3">
                 <button
-                  onClick={() => { setSearchOpen(true); setMobileOpen(false); }}
+                  onClick={() => { openSearch(); setMobileOpen(false); }}
                   className="mb-3 flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground"
                 >
                   <Search className="h-4 w-4" /> Search products...
