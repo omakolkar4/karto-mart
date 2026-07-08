@@ -2,12 +2,67 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Clock, ShieldCheck, Tag, Truck, Headphones, Leaf, Star, Apple, ChevronRight } from "lucide-react";
+import { Clock, ShieldCheck, Tag, Truck, Headphones, Leaf, Star, Apple, ChevronRight, Zap, Gift, Percent } from "lucide-react";
 import { toast } from "sonner";
 import { popularBrands, reviews, coupons } from "@/data/extras";
 import { analytics } from "@/lib/analytics";
 import { useStore } from "@/components/karto/store";
 import { Stars } from "@/components/karto/primitives";
+
+/* ---------------- Best Deals promo strip (top of page) ---------------- */
+export function BestDeals() {
+  const applyCoupon = useStore((s) => s.applyCoupon);
+  const deals = [
+    { icon: Zap, title: "Flash Sale", sub: "Up to 50% off", color: "from-red-500 to-rose-600", code: "KARTO50" },
+    { icon: Gift, title: "First Order", sub: "₹100 off above ₹599", color: "from-emerald-500 to-green-600", code: "FRESH100" },
+    { icon: Percent, title: "Weekend Special", sub: "15% off up to ₹200", color: "from-amber-500 to-orange-600", code: "WEEKEND15" },
+    { icon: Truck, title: "Free Delivery", sub: "On orders ₹199+", color: "from-sky-500 to-cyan-600", code: null },
+  ];
+  return (
+    <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {deals.map((d, i) => (
+          <motion.button
+            key={d.title}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: i * 0.06 }}
+            whileHover={{ y: -3 }}
+            onClick={() => {
+              if (d.code) {
+                const c = coupons.find((x) => x.code === d.code);
+                if (c) {
+                  const ok = applyCoupon(c);
+                  if (ok) toast.success(`${d.title} applied!`, { description: c.description });
+                  else toast.error("Add items first", { description: `Add ₹${c.minOrder}+ to use this offer.` });
+                }
+              } else {
+                document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${d.color} p-4 text-left text-white shadow-lg`}
+          >
+            <div className="absolute -right-5 -top-5 h-16 w-16 rounded-full bg-white/15 transition group-hover:scale-125" />
+            <div className="relative flex items-center gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
+                <d.icon className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-black">{d.title}</p>
+                <p className="truncate text-xs text-white/85">{d.sub}</p>
+              </div>
+            </div>
+            {d.code && (
+              <span className="absolute bottom-2 right-2 rounded-md border border-dashed border-white/60 bg-white/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider">
+                {d.code}
+              </span>
+            )}
+          </motion.button>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 /* ---------------- Brands marquee ---------------- */
 export function Brands() {

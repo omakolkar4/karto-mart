@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, ShoppingCart, Heart, User, MapPin, Menu, X, Moon, Sun, ChevronDown, Phone,
+  Search, ShoppingCart, Heart, User, MapPin, Menu, X, Moon, Sun, ChevronDown, Phone, Navigation, Loader2,
 } from "lucide-react";
 import { useStore } from "@/components/karto/store";
 import { categories } from "@/data/categories";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { analytics } from "@/lib/analytics";
+import { detectLocation } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -25,20 +26,35 @@ export function Header() {
   const selectedCategory = useStore((s) => s.selectedCategory);
   const setSelectedCategory = useStore((s) => s.setSelectedCategory);
   const location = useStore((s) => s.location);
+  const setLocation = useStore((s) => s.setLocation);
   const { theme, setTheme } = useTheme();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [detecting, setDetecting] = useState(false);
   // Stable search placeholder to avoid hydration mismatch; rotated client-side only.
   const [placeholder, setPlaceholder] = useState("fresh fruits");
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  const handleDetect = async () => {
+    setDetecting(true);
+    try {
+      const result = await detectLocation();
+      setLocation(result.short);
+      toast.success("Location detected", { description: result.short, duration: 2500 });
+    } catch (err) {
+      toast.error("Couldn't detect location", {
+        description: err instanceof Error ? err.message : "Please enable location permission.",
+      });
+    } finally {
+      setDetecting(false);
+    }
+  };
+
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const ideas = ["fresh fruits", "milk", "bananas", "chips", "bread", "chocolate", "onions", "coffee", "diapers", "paneer"];
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPlaceholder(ideas[Math.floor(Math.random() * ideas.length)]);
   }, []);
 
@@ -116,14 +132,18 @@ export function Header() {
 
           {/* location */}
           <button
-            onClick={() => toast.info("Delivery location", { description: location, duration: 1800 })}
-            className="hidden items-center gap-2 rounded-lg px-2 py-1.5 text-left transition hover:bg-muted lg:flex"
+            onClick={handleDetect}
+            disabled={detecting}
+            className="hidden items-center gap-2 rounded-lg px-2 py-1.5 text-left transition hover:bg-muted disabled:opacity-60 lg:flex"
+            aria-label="Detect my location"
           >
-            <MapPin className="h-4 w-4 text-karto-green" />
+            {detecting ? <Loader2 className="h-4 w-4 animate-spin text-karto-green" /> : <MapPin className="h-4 w-4 text-karto-green" />}
             <div className="leading-tight">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Deliver to</p>
+              <p className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                Deliver to <Navigation className="h-2.5 w-2.5" />
+              </p>
               <p className="flex max-w-44 items-center gap-1 truncate text-xs font-semibold">
-                {location} <ChevronDown className="h-3 w-3" />
+                {detecting ? "Detecting..." : location} {!detecting && <ChevronDown className="h-3 w-3" />}
               </p>
             </div>
           </button>

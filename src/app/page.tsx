@@ -8,7 +8,7 @@ import { Catalog } from "@/components/karto/catalog";
 import { ProductRail } from "@/components/karto/product-rail";
 import { FlashSale } from "@/components/karto/flash-sale";
 import {
-  Brands, WhyChooseUs, Stats, Reviews, Offers, DownloadApp, Newsletter,
+  Brands, WhyChooseUs, Stats, Reviews, Offers, DownloadApp, Newsletter, BestDeals,
 } from "@/components/karto/marketing-sections";
 import { Footer } from "@/components/karto/footer";
 import { CartDrawer } from "@/components/karto/cart-drawer";
@@ -36,19 +36,10 @@ export default function Home() {
         <main className="flex-1">
           <Hero />
 
+          {/* Best deals promo strip — right at the top */}
+          <BestDeals />
+
           <CategoryStrip />
-
-          {featured.length > 0 && (
-            <ProductRail
-              id="featured"
-              eyebrow="Handpicked for you"
-              title="Featured Products"
-              subtitle="Trending favourites our customers love right now"
-              products={featured}
-            />
-          )}
-
-          <FlashSale />
 
           {bestSellers.length > 0 && (
             <ProductRail
@@ -57,6 +48,18 @@ export default function Home() {
               title="Best Sellers"
               subtitle="Top-rated products flying off our shelves"
               products={bestSellers}
+            />
+          )}
+
+          <FlashSale />
+
+          {featured.length > 0 && (
+            <ProductRail
+              id="featured"
+              eyebrow="Handpicked for you"
+              title="Featured Products"
+              subtitle="Trending favourites our customers love right now"
+              products={featured}
             />
           )}
 

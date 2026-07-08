@@ -112,3 +112,28 @@ Work Log:
 
 Stage Summary:
 - Category navbar is now compact, single-line, horizontally scrollable showing all 15 categories with short labels. No more excessive vertical space.
+
+---
+Task ID: 6
+Agent: Main (Z.ai Code)
+Task: Redesign hero (modern, not old left-text/right-image), add geolocation, move offers/best deals to top.
+
+Work Log:
+- Created src/lib/geo.ts: browser Geolocation API + OpenStreetMap Nominatim reverse geocoding (free, no API key). detectLocation() returns {address, short, lat, lng}.
+- Redesigned Hero (src/components/karto/hero.tsx):
+  * Modern dark-themed hero (bg-foreground/text-background) instead of light gradient — premium, high-contrast look like Blinkit/Zepto dark mode.
+  * 12-col grid: pitch+search+location (span 7) on left, modern visual grid (span 5) on right.
+  * Right side: large feature image with gradient overlay + delivery badge, PLUS a 2x2 grid of real category photo tiles (fruits/dairy/snacks/bakery) with hover zoom + floating product chips. No more single-image-right layout.
+  * Added "Detect my location" button next to the delivery address — uses navigator.geolocation + reverse geocoding, updates the store location, shows loading spinner + success/error toasts.
+  * White search bar pops on dark background; trust badges in glassmorphic cards.
+- Added "Detect my location" to header location button too (clicking the "Deliver to" area now triggers geolocation with Navigation icon + spinner).
+- New BestDeals promo strip (marketing-sections.tsx): 4 gradient deal cards (Flash Sale, First Order, Weekend Special, Free Delivery) — clicking applies the coupon or scrolls to catalog. Placed right after hero.
+- Reordered page.tsx: Hero → BestDeals → Categories → BestSellers → FlashSale → Featured → Catalog → NewArrivals → Offers → Today's Offers → Brands → WhyChooseUs → Stats → Reviews → DownloadApp → Newsletter.
+- Cleaned up unused eslint-disable directives. Lint passes clean (0 errors).
+- Agent Browser verified: dark modern hero renders, "Detect my location" button works (geolocation available), BestDeals strip at top with all 4 deals, deal click applies coupon toast, no console/hydration errors.
+
+Stage Summary:
+- Hero is now a modern dark-themed split layout with a visual category-tile grid (not the old single-image-right style).
+- Geolocation "Detect my location" works via browser API + reverse geocoding (header + hero).
+- Best deals/offers promo strip is now at the very top, right below the hero.
+- Section order optimized: deals and best sellers surface early.
