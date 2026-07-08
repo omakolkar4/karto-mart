@@ -304,7 +304,7 @@ export function CheckoutModal() {
                           if (!p) return null;
                           return (
                             <div key={item.productId} className="flex items-center gap-3">
-                              <ProductImage emoji={p.emoji} gradient={p.gradient} size="sm" className="h-11 w-11 shrink-0 rounded-lg" />
+                              <ProductImage image={p.image} emoji={p.emoji} gradient={p.gradient} size="sm" className="h-11 w-11 shrink-0 rounded-lg" />
                               <div className="flex-1"><p className="line-clamp-1 text-sm font-semibold">{p.name}</p><p className="text-xs text-muted-foreground">{item.qty} × {formatPrice(p.price)}</p></div>
                               <span className="text-sm font-bold">{formatPrice(p.price * item.qty)}</span>
                             </div>
@@ -370,7 +370,7 @@ export function CheckoutModal() {
                     if (!p) return null;
                     return (
                       <div key={item.productId} className="flex items-center gap-2 text-xs">
-                        <ProductImage emoji={p.emoji} gradient={p.gradient} size="sm" className="h-9 w-9 shrink-0 rounded-md" />
+                        <ProductImage image={p.image} emoji={p.emoji} gradient={p.gradient} size="sm" className="h-9 w-9 shrink-0 rounded-md" />
                         <div className="flex-1"><p className="line-clamp-1 font-semibold">{p.name}</p><p className="text-muted-foreground">{item.qty} × {formatPrice(p.price)}</p></div>
                         <span className="font-bold">{formatPrice(p.price * item.qty)}</span>
                       </div>

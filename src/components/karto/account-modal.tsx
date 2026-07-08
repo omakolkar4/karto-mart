@@ -121,7 +121,7 @@ export function AccountModal() {
                           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                             {o.items.map((i) => (
                               <div key={i.productId} className="flex shrink-0 items-center gap-2 rounded-lg border border-border p-1.5 pr-2">
-                                <ProductImage emoji={i.emoji} gradient={i.gradient} size="sm" className="h-8 w-8 rounded-md" />
+                                <ProductImage image={productMap[i.productId]?.image} emoji={i.emoji} gradient={i.gradient} size="sm" className="h-8 w-8 rounded-md" />
                                 <div className="text-xs"><p className="line-clamp-1 font-semibold">{i.name}</p><p className="text-muted-foreground">x{i.qty}</p></div>
                               </div>
                             ))}
@@ -169,7 +169,7 @@ export function AccountModal() {
                       if (!p) return null;
                       return (
                         <div key={id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
-                          <ProductImage emoji={p.emoji} gradient={p.gradient} size="sm" className="h-14 w-14 shrink-0 rounded-lg" />
+                          <ProductImage image={p.image} emoji={p.emoji} gradient={p.gradient} size="sm" className="h-14 w-14 shrink-0 rounded-lg" />
                           <div className="flex-1"><p className="line-clamp-1 text-sm font-semibold">{p.name}</p><p className="text-xs text-muted-foreground">{p.unit}</p><p className="text-sm font-bold text-karto-green">{formatPrice(p.price)}</p></div>
                           <div className="flex gap-1">
                             <button onClick={() => { wishlistToCart(id); toast.success("Moved to cart"); }} disabled={!p.inStock} className="rounded-full bg-karto-green px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"><ShoppingCart className="h-3.5 w-3.5" /></button>

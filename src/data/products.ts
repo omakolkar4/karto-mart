@@ -15,6 +15,7 @@ export type Product = {
   gradient: string;
   description: string;
   tags: string[];
+  image?: string; // real product photo URL (assigned at runtime from image map)
   isNew?: boolean;
   isBestSeller?: boolean;
   isFlashSale?: boolean;
@@ -226,6 +227,21 @@ export const products: Product[] = [
 export const productMap: Record<string, Product> = Object.fromEntries(
   products.map((pr) => [pr.id, pr])
 );
+
+// Assign real product photos from the image map (deterministic by product index within category).
+import { productImagesByCategory } from "@/data/image-map";
+(function assignImages() {
+  const byCat: Record<string, Product[]> = {};
+  for (const p of products) (byCat[p.category] ||= []).push(p);
+  for (const [cat, list] of Object.entries(byCat)) {
+    const imgs = productImagesByCategory[cat] || [];
+    if (imgs.length === 0) continue;
+    list.forEach((p, i) => {
+      p.image = imgs[i % imgs.length];
+      productMap[p.id].image = p.image;
+    });
+  }
+})();
 
 export function discountPct(p: Product) {
   return Math.round(((p.mrp - p.price) / p.mrp) * 100);

@@ -69,3 +69,26 @@ Work Log:
 
 Stage Summary:
 - Hydration error fully resolved. Page renders cleanly on SSR + client hydration with zero mismatches.
+
+---
+Task ID: 4
+Agent: Main (Z.ai Code)
+Task: Upgrade Karto to use real product images + premium Blinkit/Zepto-style design.
+
+Work Log:
+- Used image-search skill (z-ai image-search CLI) to fetch real grocery product photos from the web.
+- Ran 15 category image searches (fruits, vegetables, dairy, snacks, beverages, bakery, personal-care, baby-care, cleaning, frozen, instant, medicines, pet-care, electronics, home), 8 images each = 120 real product photos hosted on stable OSS URLs (sfile.chatglm.cn).
+- Wrote scripts/build-image-map.js to parse the search output (log lines + JSON) and generate src/data/image-map.ts with categoryImages + productImagesByCategory maps.
+- Assigned real images to all 100 products deterministically (by index within category) and to all 15 categories.
+- Redesigned ProductImage component: now renders real <img> with shimmer skeleton while loading, graceful emoji+gradient fallback on error.
+- Redesigned ProductCard (Blinkit-style): real photo fills card top, delivery-time badge overlay, rating pill, discount % next to price, outline ADD button that fills green on hover, cleaner spacing.
+- Redesigned CategoryStrip: real category photos in rounded tiles (4 cols mobile → 15 cols desktop), hover scale, selected ring.
+- Redesigned Hero: bolder headline ("Groceries delivered in minutes, not hours"), real product image collage with floating chips showing real photos + price + rating, 3 trust badges in card grid.
+- Updated ProductModal, CartDrawer, WishlistDrawer, CheckoutModal, AccountModal to pass image prop to ProductImage everywhere.
+- Excluded scripts/ from ESLint; lint passes clean (0 errors).
+- Agent Browser verification: 125 real product images load on home page, 0 broken images, no console/hydration errors. Product modal shows real images (132 total incl. related/FBT). Cart drawer shows real product images.
+
+Stage Summary:
+- Karto now uses 120 real grocery product photos across all 100 products + 15 categories.
+- Premium Blinkit/Zepto-inspired design: real images, cleaner cards, delivery badges, rating pills, better hero.
+- Lint clean, no errors, all images load successfully from stable OSS CDN.

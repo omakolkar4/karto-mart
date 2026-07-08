@@ -4,6 +4,7 @@ export type Category = {
   emoji: string;
   gradient: string; // tailwind gradient classes
   description: string;
+  image?: string; // real category photo URL
 };
 
 export const categories: Category[] = [
@@ -25,3 +26,9 @@ export const categories: Category[] = [
 ];
 
 export const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c]));
+
+// Assign real category photos from the image map.
+import { categoryImages } from "@/data/image-map";
+for (const c of categories) {
+  if (categoryImages[c.id]) c.image = categoryImages[c.id];
+}

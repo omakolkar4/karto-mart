@@ -91,7 +91,7 @@ export function WishlistDrawer() {
                           className="shrink-0"
                           aria-label="View product"
                         >
-                          <ProductImage emoji={p.emoji} gradient={p.gradient} size="sm" className="h-16 w-16 rounded-xl" />
+                          <ProductImage image={p.image} emoji={p.emoji} gradient={p.gradient} size="sm" className="h-16 w-16 rounded-xl" />
                         </button>
                         <div className="flex flex-1 flex-col">
                           <div className="flex items-start justify-between">

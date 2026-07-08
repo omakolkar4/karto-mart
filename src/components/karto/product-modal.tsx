@@ -85,7 +85,7 @@ export function ProductModal() {
               {/* gallery */}
               <div className="relative">
                 <div className="relative aspect-square w-full md:aspect-auto md:h-full md:min-h-[440px]">
-                  <ProductImage emoji={product.emoji} gradient={product.gradient} size="xl" className="h-full w-full" />
+                  <ProductImage image={product.image} emoji={product.emoji} gradient={product.gradient} size="xl" className="h-full w-full" alt={product.name} />
                   {discountPct(product) > 0 && (
                     <span className="absolute left-4 top-4 rounded-full bg-karto-green px-3 py-1 text-xs font-bold text-white shadow">
                       {discountPct(product)}% OFF
@@ -256,7 +256,7 @@ export function ProductModal() {
                 <div className="hide-scrollbar flex gap-3 overflow-x-auto pb-2">
                   {related.map((p) => (
                     <button key={p.id} onClick={() => { setId(p.id); setTab("desc"); }} className="w-36 shrink-0 rounded-xl border border-border bg-card p-2 text-left transition hover:border-karto-green/40 hover:shadow-sm">
-                      <ProductImage emoji={p.emoji} gradient={p.gradient} size="sm" className="mb-2 h-20 w-full rounded-lg" />
+                      <ProductImage image={p.image} emoji={p.emoji} gradient={p.gradient} size="sm" className="mb-2 h-20 w-full rounded-lg" alt={p.name} />
                       <p className="line-clamp-1 text-xs font-semibold">{p.name}</p>
                       <p className="text-xs font-bold text-karto-green">{formatPrice(p.price)}</p>
                     </button>

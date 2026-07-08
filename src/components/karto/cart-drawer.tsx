@@ -153,7 +153,7 @@ export function CartDrawer() {
                             exit={{ opacity: 0, height: 0 }}
                             className="flex gap-3 rounded-2xl border border-border bg-card p-3"
                           >
-                            <ProductImage emoji={p.emoji} gradient={p.gradient} size="sm" className="h-16 w-16 shrink-0 rounded-xl" />
+                            <ProductImage image={p.image} emoji={p.emoji} gradient={p.gradient} size="sm" className="h-16 w-16 shrink-0 rounded-xl" />
                             <div className="flex flex-1 flex-col">
                               <div className="flex items-start justify-between gap-2">
                                 <div>
