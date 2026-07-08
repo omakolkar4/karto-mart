@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { useStore } from "@/components/karto/store";
 import { categories } from "@/data/categories";
-import { products } from "@/data/products";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { analytics } from "@/lib/analytics";
@@ -31,8 +30,17 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // Stable search placeholder to avoid hydration mismatch; rotated client-side only.
+  const [placeholder, setPlaceholder] = useState("fresh fruits");
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const ideas = ["fresh fruits", "milk", "bananas", "chips", "bread", "chocolate", "onions", "coffee", "diapers", "paneer"];
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPlaceholder(ideas[Math.floor(Math.random() * ideas.length)]);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -127,7 +135,7 @@ export function Header() {
           >
             <Search className="h-4 w-4 text-muted-foreground group-hover:text-karto-green" />
             <span className="truncate">
-              Search for <span className="text-foreground">"{products[Math.floor(Math.random() * products.length)].name}"</span>...
+              Search for <span className="text-foreground">"{placeholder}"</span>...
             </span>
           </button>
 

@@ -7,12 +7,16 @@ import { products } from "@/data/products";
 import { ProductCard } from "@/components/karto/product-card";
 import { useRef } from "react";
 
-function useCountdown(targetMs: number) {
-  const [now, setNow] = useState(Date.now());
+function useCountdown(targetMs: number | null) {
+  // Start at 0 so SSR and initial client hydration match (no Date.now() during render).
+  const [now, setNow] = useState(0);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
+  if (targetMs === null || now === 0) return { h: 8, m: 0, s: 0 };
   const diff = Math.max(0, targetMs - now);
   const h = Math.floor(diff / 3.6e6);
   const m = Math.floor((diff % 3.6e6) / 6e4);
@@ -25,8 +29,12 @@ function pad(n: number) {
 }
 
 export function FlashSale() {
-  // 8 hours from first render
-  const [target] = useState(() => Date.now() + 8 * 3.6e6);
+  // Target is computed client-side only to avoid Date.now() hydration mismatch.
+  const [target, setTarget] = useState<number | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTarget(Date.now() + 8 * 3.6e6);
+  }, []);
   const { h, m, s } = useCountdown(target);
   const ref = useRef<HTMLDivElement>(null);
   const flash = products.filter((p) => p.isFlashSale).concat(products.filter((p) => p.isBestSeller)).slice(0, 10);

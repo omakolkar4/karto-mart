@@ -29,6 +29,25 @@ export const brands = [
 
 const g = (from: string, to: string) => `from-${from} to-${to}`;
 
+/**
+ * Deterministic pseudo-random generator seeded from a string.
+ * Ensures server-rendered and client-hydrated product data are identical,
+ * avoiding React hydration mismatches (no Math.random() during render).
+ */
+function seededRandom(seed: string): () => number {
+  let h = 1779033703 ^ seed.length;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return function () {
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
+  };
+}
+
 // helper to compute discount from price/mrp
 function p(
   id: string,
@@ -43,8 +62,12 @@ function p(
   description: string,
   opts: Partial<Product> = {}
 ): Product {
-  const rating = opts.rating ?? Number((3.8 + Math.random() * 1.2).toFixed(1));
-  const reviews = opts.reviews ?? Math.floor(40 + Math.random() * 1800);
+  const rand = seededRandom(id);
+  const rating = opts.rating ?? Number((3.8 + rand() * 1.2).toFixed(1));
+  const reviews = opts.reviews ?? Math.floor(40 + rand() * 1800);
+  const deliveryIdx = Math.floor(rand() * 5);
+  const inStockVal = rand();
+  const stockVal = rand();
   return {
     id,
     name,
@@ -54,9 +77,9 @@ function p(
     mrp,
     rating,
     reviews,
-    deliveryMins: opts.deliveryMins ?? [10, 12, 15, 20, 25][Math.floor(Math.random() * 5)],
-    inStock: opts.inStock ?? Math.random() > 0.12,
-    stockCount: opts.stockCount ?? Math.floor(5 + Math.random() * 60),
+    deliveryMins: opts.deliveryMins ?? [10, 12, 15, 20, 25][deliveryIdx],
+    inStock: opts.inStock ?? inStockVal > 0.12,
+    stockCount: opts.stockCount ?? Math.floor(5 + stockVal * 60),
     unit,
     emoji,
     gradient,

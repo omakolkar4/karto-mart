@@ -50,3 +50,22 @@ Stage Summary:
 - Karto is fully functional and browser-verified. All core flows work: browse, search/filter, product details, cart, wishlist, auth, 6-step checkout, order placement, order tracking, account management, dark mode, responsive.
 - No runtime errors, no console errors, lint clean.
 - Ready for demonstration.
+
+---
+Task ID: 3
+Agent: Main (Z.ai Code)
+Task: Fix React hydration mismatch error reported in header search placeholder.
+
+Work Log:
+- Root cause: `Math.random()` and `Date.now()` called during render produce different values on server vs client → hydration mismatch.
+- Fixed 3 spots:
+  1. header.tsx: replaced `products[Math.floor(Math.random()*...)].name` search placeholder with a stable `useState("fresh fruits")` value rotated client-side only in `useEffect` (after hydration). Removed now-unused `products` import.
+  2. products.ts `p()` helper: replaced `Math.random()` (used for rating, reviews, deliveryMins, inStock, stockCount) with a deterministic `seededRandom(id)` PRNG seeded by product id. Now server and client compute identical product metadata.
+  3. flash-sale.tsx: moved `Date.now()` out of `useState` initializers into `useEffect`; countdown renders stable placeholder (8h) during SSR/hydration, then switches to real client time after mount.
+- Added `eslint-disable-next-line react-hooks/set-state-in-effect` for the intentional client-only setState initializations (correct hydration-safe pattern).
+- Verified remaining `Math.random()`/`Date.now()`/`new Date()` usages are all in event handlers or post-interaction modals (checkout saveAddress, placeOrder, account member-since, order invoice dates) — safe, no SSR/hydration path.
+- `bun run lint` → 0 errors.
+- Agent Browser verification: page loads with NO hydration errors in console or dev log. Product values are now deterministic & stable across reloads (e.g. Royal Gala Apples consistently shows rating 4.8, delivery 15 min).
+
+Stage Summary:
+- Hydration error fully resolved. Page renders cleanly on SSR + client hydration with zero mismatches.
