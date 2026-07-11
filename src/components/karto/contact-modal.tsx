@@ -100,7 +100,7 @@ export function ContactModal() {
 
                 {/* customer care */}
                 <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-                  {[{ icon: Phone, label: "Call", value: "1800-200-KARTO" }, { icon: Mail, label: "Email", value: "support@karto.shop" }, { icon: Clock, label: "Hours", value: "24x7" }].map((c) => (
+                  {[{ icon: Phone, label: "Call", value: "+91-8208353925" }, { icon: Mail, label: "Email", value: "support@karto.shop" }, { icon: Clock, label: "Hours", value: "24x7" }].map((c) => (
                     <div key={c.label} className="rounded-xl border border-border bg-card p-3">
                       <c.icon className="mx-auto h-5 w-5 text-karto-green" />
                       <p className="mt-1 text-[11px] font-semibold text-muted-foreground">{c.label}</p>
@@ -115,13 +115,13 @@ export function ContactModal() {
                 <h3 className="mb-3 flex items-center gap-2 text-base font-bold"><MapPin className="h-5 w-5 text-karto-green" /> Our location</h3>
                 <div className="overflow-hidden rounded-xl border border-border">
                   <iframe
-                    title="Karto HQ"
-                    src="https://www.google.com/maps?q=Bandra+West+Mumbai&output=embed"
+                    title="Karto Location"
+                    src="https://www.google.com/maps?q=MIT+ADT+University+Pune&output=embed"
                     className="h-44 w-full"
                     loading="lazy"
                   />
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">Karto HQ, Bandra West, Mumbai 400050, India</p>
+                <p className="mt-2 text-xs text-muted-foreground">MIT ADT University, Pune, Maharashtra 412201, India</p>
 
                 <h3 className="mb-2 mt-5 text-base font-bold">Frequently asked questions</h3>
                 <Accordion type="single" collapsible className="rounded-xl border border-border bg-card px-2">

@@ -11,6 +11,8 @@ export function Footer() {
   const navigateToCategory = useStore((s) => s.navigateToCategory);
   const navigateHome = useStore((s) => s.navigateHome);
   const setContactOpen = useStore((s) => s.setContactOpen);
+  const openInfoModal = useStore((s) => s.openInfoModal);
+  const setAccountOpen = useStore((s) => s.setAccountOpen);
   const [email, setEmail] = useState("");
 
   const scrollTo = (id: string) => {
@@ -99,6 +101,7 @@ export function Footer() {
         <div>
           <h4 className="mb-3 text-sm font-bold">Company</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><button onClick={() => openInfoModal("about")} className="transition hover:text-karto-green">About Us</button></li>
             <li><button onClick={() => scrollTo("offers")} className="transition hover:text-karto-green">Offers</button></li>
             <li><button onClick={() => scrollTo("flash-sale")} className="transition hover:text-karto-green">Flash Sale</button></li>
             <li><button onClick={() => setContactOpen(true)} className="transition hover:text-karto-green">Contact</button></li>
@@ -110,10 +113,10 @@ export function Footer() {
           <h4 className="mb-3 text-sm font-bold">Help</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><button onClick={() => setContactOpen(true)} className="transition hover:text-karto-green">Customer Care</button></li>
-            <li><button onClick={() => setContactOpen(true)} className="transition hover:text-karto-green">FAQs</button></li>
-            <li><button onClick={() => setContactOpen(true)} className="transition hover:text-karto-green">Cancellation</button></li>
-            <li><button onClick={() => setContactOpen(true)} className="transition hover:text-karto-green">Returns</button></li>
-            <li><button onClick={() => setContactOpen(true)} className="transition hover:text-karto-green">Track Order</button></li>
+            <li><button onClick={() => openInfoModal("faqs")} className="transition hover:text-karto-green">FAQs</button></li>
+            <li><button onClick={() => openInfoModal("cancellation")} className="transition hover:text-karto-green">Cancellation</button></li>
+            <li><button onClick={() => openInfoModal("returns")} className="transition hover:text-karto-green">Returns</button></li>
+            <li><button onClick={() => setAccountOpen(true)} className="transition hover:text-karto-green">Track Order</button></li>
           </ul>
         </div>
       </div>

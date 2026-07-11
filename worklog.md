@@ -451,3 +451,34 @@ Work Log:
 Stage Summary:
 - Footer is now compact with MIT ADT University Pune address + +91-8208363925 phone. Removed newsletter CTA, long description, and redundant Company/Help columns.
 - Navbar category strip enhanced: rounded tiles, solid green active state, hover lift + shadow, larger emoji with scale on hover, gradient background.
+
+---
+Task ID: FOOTER-PAGES-CONTACT
+Agent: Main (Z.ai Code)
+Task: Make footer Company/Help links open pages, add About Us, update contact modal phone/address to MIT ADT.
+
+Work Log:
+- Created InfoModal component (src/components/karto/info-modal.tsx) with 5 content pages:
+  * About Us — Mission, Vision, Values (4 value cards), Stats, Team section.
+  * FAQs — 5 Q&A cards.
+  * Cancellation Policy — how to cancel, refund process.
+  * Returns & Refunds — eligibility, refund process.
+  * Track Your Order — status flow, how to track.
+  Each page has a "Still have questions?" CTA with contact details (+91-8208353925, support@karto.shop, MIT ADT University Pune) and a "Contact Support" button that opens the contact modal.
+- Added infoModalContent state + openInfoModal/setInfoModalContent to the store. Added InfoModal to global Escape handler. Added InfoModal to page.tsx overlays.
+- Footer Company section: added "About Us" at top (opens infoModal "about"). Offers → scroll to offers. Flash Sale → scroll to flash sale. Contact → contact modal. All Products → category page.
+- Footer Help section: Customer Care → contact modal. FAQs → infoModal "faqs". Cancellation → infoModal "cancellation". Returns → infoModal "returns". Track Order → account modal (orders).
+- Contact modal: updated phone from "1800-200-KARTO" to "+91-8208353925". Updated map from Bandra West Mumbai to MIT ADT University Pune. Updated address from "Karto HQ, Bandra West, Mumbai 400050, India" to "MIT ADT University, Pune, Maharashtra 412201, India".
+- Agent Browser verified:
+  * About Us → opens modal with Mission/Vision ✓
+  * FAQs → opens FAQ page ✓
+  * Cancellation → opens Cancellation Policy ✓
+  * Returns → opens Returns & Refunds ✓
+  * Customer Care → opens contact modal ✓
+  * Contact modal: +91-8208353925 ✓, MIT ADT University address ✓, no old Bandra/1800 ✓
+  * No console errors. Lint passes clean.
+
+Stage Summary:
+- All footer Company/Help links now open dedicated pages (About Us, FAQs, Cancellation, Returns) via InfoModal, or scroll to sections / open contact/account modals.
+- About Us added at top of Company section.
+- Contact modal: phone +91-8208353925, map + address = MIT ADT University Pune.

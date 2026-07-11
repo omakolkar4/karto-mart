@@ -22,6 +22,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (s.checkoutOpen) { s.setCheckoutOpen(false); return; }
       if (s.locationModalOpen) { s.setLocationModalOpen(false); return; }
       if (s.categoriesDrawerOpen) { s.setCategoriesDrawerOpen(false); return; }
+      if (s.infoModalContent) { s.setInfoModalContent(null); return; }
       if (s.authOpen) { s.setAuthOpen(false); return; }
       if (s.accountOpen) { s.setAccountOpen(false); return; }
       if (s.contactOpen) { s.setContactOpen(false); return; }

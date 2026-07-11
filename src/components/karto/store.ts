@@ -71,6 +71,7 @@ type UIState = {
   contactOpen: boolean;
   locationModalOpen: boolean;
   categoriesDrawerOpen: boolean;
+  infoModalContent: string | null;
   productModalId: string | null;
   lastOrder: Order | null;
   selectedCategory: string | null;
@@ -102,6 +103,8 @@ type StoreState = UIState & {
   setContactOpen: (v: boolean) => void;
   setLocationModalOpen: (v: boolean) => void;
   setCategoriesDrawerOpen: (v: boolean) => void;
+  openInfoModal: (content: string) => void;
+  setInfoModalContent: (c: string | null) => void;
   openProduct: (id: string | null) => void;
   setLastOrder: (o: Order | null) => void;
   setSelectedCategory: (c: string | null) => void;
@@ -164,6 +167,7 @@ export const useStore = create<StoreState>()(
       contactOpen: false,
       locationModalOpen: false,
       categoriesDrawerOpen: false,
+      infoModalContent: null,
       productModalId: null,
       lastOrder: null,
       selectedCategory: null,
@@ -192,6 +196,8 @@ export const useStore = create<StoreState>()(
       setContactOpen: (v) => set({ contactOpen: v }),
       setLocationModalOpen: (v) => set({ locationModalOpen: v }),
       setCategoriesDrawerOpen: (v) => set({ categoriesDrawerOpen: v }),
+      openInfoModal: (content) => set({ infoModalContent: content }),
+      setInfoModalContent: (c) => set({ infoModalContent: c }),
       openProduct: (id) => set({ productModalId: id }),
       setLastOrder: (o) => set({ lastOrder: o }),
       setSelectedCategory: (c) => set({ selectedCategory: c }),

@@ -21,6 +21,7 @@ import { OrderSuccessModal } from "@/components/karto/order-success-modal";
 import { AccountModal } from "@/components/karto/account-modal";
 import { ContactModal } from "@/components/karto/contact-modal";
 import { LocationModal } from "@/components/karto/location-modal";
+import { InfoModal } from "@/components/karto/info-modal";
 import { CategoriesDrawer } from "@/components/karto/categories-drawer";
 import { ErrorBoundary } from "@/components/karto/error-boundary";
 import { useStore } from "@/components/karto/store";
@@ -117,6 +118,7 @@ export default function Home() {
         <AccountModal />
         <ContactModal />
         <LocationModal />
+        <InfoModal />
       </ErrorBoundary>
     </div>
   );
