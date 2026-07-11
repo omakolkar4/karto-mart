@@ -209,16 +209,16 @@ export function CheckoutModal() {
                     ) : (
                       <div className="rounded-xl border border-border p-4">
                         <div className="grid gap-3 sm:grid-cols-2">
-                          <In label="Full Name *" value={newAddr.fullName} onChange={(v) => setNewAddr({ ...newAddr, fullName: v })} />
-                          <In label="Mobile Number *" value={newAddr.phone} onChange={(v) => setNewAddr({ ...newAddr, phone: v })} placeholder="10-digit" />
-                          <In label="Alternate Number" value={newAddr.altPhone} onChange={(v) => setNewAddr({ ...newAddr, altPhone: v })} />
-                          <In label="House / Flat No *" value={newAddr.house} onChange={(v) => setNewAddr({ ...newAddr, house: v })} />
-                          <In label="Street *" value={newAddr.street} onChange={(v) => setNewAddr({ ...newAddr, street: v })} />
-                          <In label="Area / Locality *" value={newAddr.area} onChange={(v) => setNewAddr({ ...newAddr, area: v })} />
-                          <In label="Landmark" value={newAddr.landmark} onChange={(v) => setNewAddr({ ...newAddr, landmark: v })} />
-                          <In label="City *" value={newAddr.city} onChange={(v) => setNewAddr({ ...newAddr, city: v })} />
-                          <In label="State *" value={newAddr.state} onChange={(v) => setNewAddr({ ...newAddr, state: v })} />
-                          <In label="Pincode *" value={newAddr.pincode} onChange={(v) => setNewAddr({ ...newAddr, pincode: v })} placeholder="6-digit" />
+                          <In label="Full Name *" value={newAddr.fullName} onChange={(v) => setNewAddr({ ...newAddr, fullName: v })} placeholder="Enter full name" />
+                          <In label="Mobile Number *" value={newAddr.phone} onChange={(v) => setNewAddr({ ...newAddr, phone: v })} placeholder="Enter 10-digit mobile number" />
+                          <In label="Alternate Number" value={newAddr.altPhone} onChange={(v) => setNewAddr({ ...newAddr, altPhone: v })} placeholder="Enter alternate number" />
+                          <In label="House / Flat No *" value={newAddr.house} onChange={(v) => setNewAddr({ ...newAddr, house: v })} placeholder="Enter house or flat number" />
+                          <In label="Street *" value={newAddr.street} onChange={(v) => setNewAddr({ ...newAddr, street: v })} placeholder="Enter street name" />
+                          <In label="Area / Locality *" value={newAddr.area} onChange={(v) => setNewAddr({ ...newAddr, area: v })} placeholder="Enter area or locality" />
+                          <In label="Landmark" value={newAddr.landmark} onChange={(v) => setNewAddr({ ...newAddr, landmark: v })} placeholder="Enter nearby landmark" />
+                          <In label="City *" value={newAddr.city} onChange={(v) => setNewAddr({ ...newAddr, city: v })} placeholder="Enter city" />
+                          <In label="State *" value={newAddr.state} onChange={(v) => setNewAddr({ ...newAddr, state: v })} placeholder="Enter state" />
+                          <In label="Pincode *" value={newAddr.pincode} onChange={(v) => setNewAddr({ ...newAddr, pincode: v })} placeholder="Enter 6-digit pincode" />
                         </div>
                         <div className="mt-3">
                           <p className="mb-1.5 text-xs font-semibold text-muted-foreground">Address Type</p>
@@ -276,18 +276,18 @@ export function CheckoutModal() {
 
                     {payment === "card" && (
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 space-y-3 rounded-xl border border-border p-4">
-                        <In label="Card Number" value={card.number} onChange={(v) => setCard({ ...card, number: v })} placeholder="1234 5678 9012 3456" />
-                        <In label="Card Holder Name" value={card.name} onChange={(v) => setCard({ ...card, name: v })} placeholder="As on card" />
+                        <In label="Card Number" value={card.number} onChange={(v) => setCard({ ...card, number: v })} placeholder="Enter 16-digit card number" />
+                        <In label="Card Holder Name" value={card.name} onChange={(v) => setCard({ ...card, name: v })} placeholder="Enter name as on card" />
                         <div className="grid grid-cols-2 gap-3">
-                          <In label="Expiry (MM/YY)" value={card.expiry} onChange={(v) => setCard({ ...card, expiry: v })} placeholder="08/27" />
-                          <In label="CVV" value={card.cvv} onChange={(v) => setCard({ ...card, cvv: v })} placeholder="•••" />
+                          <In label="Expiry (MM/YY)" value={card.expiry} onChange={(v) => setCard({ ...card, expiry: v })} placeholder="Enter expiry month/year" />
+                          <In label="CVV" value={card.cvv} onChange={(v) => setCard({ ...card, cvv: v })} placeholder="Enter CVV" />
                         </div>
                         <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck className="h-3.5 w-3.5 text-karto-green" /> Your card details are encrypted & secure.</p>
                       </motion.div>
                     )}
                     {payment === "upi" && (
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 rounded-xl border border-border p-4">
-                        <In label="UPI ID" value={upi} onChange={(v) => setUpi(v)} placeholder="yourname@upi" />
+                        <In label="UPI ID" value={upi} onChange={(v) => setUpi(v)} placeholder="Enter your UPI ID" />
                       </motion.div>
                     )}
                     {payment === "cod" && (

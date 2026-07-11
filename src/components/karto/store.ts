@@ -149,7 +149,7 @@ type StoreState = UIState & {
   reorder: (orderId: string) => void;
 };
 
-const DEFAULT_LOCATION = "Bandra West, Mumbai 400050";
+const DEFAULT_LOCATION = "";
 
 export const useStore = create<StoreState>()(
   persist(

@@ -120,20 +120,20 @@ export function AuthModal() {
               <form onSubmit={submit} className="space-y-3">
                 {mode === "signup" && (
                   <Field icon={<User className="h-4 w-4" />} label="Full name">
-                    <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Riya Patel" className="w-full bg-transparent text-sm outline-none" />
+                    <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter your full name" className="w-full bg-transparent text-sm outline-none" />
                   </Field>
                 )}
                 <Field icon={<Mail className="h-4 w-4" />} label="Email address">
-                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" className="w-full bg-transparent text-sm outline-none" />
+                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Enter your email" className="w-full bg-transparent text-sm outline-none" />
                 </Field>
                 {mode === "signup" && (
                   <Field icon={<User className="h-4 w-4" />} label="Phone number">
-                    <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="98765 43210" className="w-full bg-transparent text-sm outline-none" />
+                    <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Enter your phone number" className="w-full bg-transparent text-sm outline-none" />
                   </Field>
                 )}
                 {mode !== "forgot" && (
                   <Field icon={<Lock className="h-4 w-4" />} label="Password">
-                    <input type={showPwd ? "text" : "password"} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" className="w-full bg-transparent text-sm outline-none" />
+                    <input type={showPwd ? "text" : "password"} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Enter your password" className="w-full bg-transparent text-sm outline-none" />
                     <button type="button" onClick={() => setShowPwd((v) => !v)} className="text-muted-foreground hover:text-foreground">
                       {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>

@@ -323,7 +323,7 @@ export function Newsletter() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email address"
+            placeholder="Enter your email address to subscribe"
             className="h-12 flex-1 rounded-full border border-border bg-background px-5 text-sm outline-none focus:border-karto-green"
           />
           <button

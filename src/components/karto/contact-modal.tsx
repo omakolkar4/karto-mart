@@ -85,14 +85,14 @@ export function ContactModal() {
                 <h3 className="mb-3 flex items-center gap-2 text-base font-bold"><MessageCircle className="h-5 w-5 text-karto-green" /> Send us a message</h3>
                 <form onSubmit={submit} className="space-y-3">
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <Field label="Name *"><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="karto-input" placeholder="Your name" /></Field>
-                    <Field label="Email *"><input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="karto-input" placeholder="you@example.com" /></Field>
+                    <Field label="Name *"><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="karto-input" placeholder="Enter your name" /></Field>
+                    <Field label="Email *"><input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="karto-input" placeholder="Enter your email" /></Field>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <Field label="Phone"><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="karto-input" placeholder="98765 43210" /></Field>
-                    <Field label="Subject *"><input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className="karto-input" placeholder="How can we help?" /></Field>
+                    <Field label="Phone"><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="karto-input" placeholder="Enter your phone number" /></Field>
+                    <Field label="Subject *"><input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className="karto-input" placeholder="Enter the subject" /></Field>
                   </div>
-                  <Field label="Message *"><textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} className="karto-input resize-none" placeholder="Write your message..." /></Field>
+                  <Field label="Message *"><textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} className="karto-input resize-none" placeholder="Write your message here" /></Field>
                   <button type="submit" disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-full bg-karto-green py-3 text-sm font-bold text-white transition hover:bg-karto-green/90 disabled:opacity-60">
                     {loading ? "Sending..." : <><Send className="h-4 w-4" /> Send Message</>}
                   </button>

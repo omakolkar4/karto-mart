@@ -81,7 +81,7 @@ export function LocationModal() {
                 <MapPin className="h-6 w-6" />
                 <h2 className="text-xl font-black">Choose your location</h2>
               </div>
-              <p className="mt-1 text-sm text-white/90">Current: {location}</p>
+              <p className="mt-1 text-sm text-white/90">{location ? `Current: ${location}` : "No location set yet — detect or enter below"}</p>
             </div>
 
             <div className="p-5">
@@ -108,7 +108,7 @@ export function LocationModal() {
                     <input
                       value={manual.area}
                       onChange={(e) => setManual({ ...manual, area: e.target.value })}
-                      placeholder="e.g. Bandra West"
+                      placeholder="Enter your area or locality"
                       className="w-full bg-transparent text-sm outline-none"
                     />
                   </div>
@@ -119,7 +119,7 @@ export function LocationModal() {
                     <input
                       value={manual.city}
                       onChange={(e) => setManual({ ...manual, city: e.target.value })}
-                      placeholder="Mumbai"
+                      placeholder="Enter your city"
                       className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-karto-green"
                     />
                   </label>
@@ -128,7 +128,7 @@ export function LocationModal() {
                     <input
                       value={manual.pincode}
                       onChange={(e) => setManual({ ...manual, pincode: e.target.value })}
-                      placeholder="400050"
+                      placeholder="Enter 6-digit pincode"
                       maxLength={6}
                       className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-karto-green"
                     />

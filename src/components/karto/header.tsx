@@ -113,13 +113,13 @@ export function Header() {
             className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition hover:bg-muted"
             aria-label="Choose location"
           >
-            <MapPin className="h-4 w-4 shrink-0 text-karto-green" />
+            <MapPin className={cn("h-4 w-4 shrink-0", location ? "text-karto-green" : "text-amber-500")} />
             <div className="leading-tight">
               <p className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                Deliver to <ChevronDown className="h-2.5 w-2.5" />
+                {location ? "Deliver to" : "Set location"} <ChevronDown className="h-2.5 w-2.5" />
               </p>
-              <p className="flex max-w-32 items-center gap-1 truncate text-xs font-semibold sm:max-w-44">
-                {location}
+              <p className={cn("flex max-w-32 items-center gap-1 truncate text-xs font-semibold sm:max-w-44", !location && "text-amber-600")}>
+                {location || "Tap to set location"}
               </p>
             </div>
           </button>

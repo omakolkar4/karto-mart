@@ -318,3 +318,34 @@ Stage Summary:
 - Out-of-stock products can no longer be added to cart (blocked at store level + UI level).
 - Product modal quantity resets when switching products (no stale qty from previous product).
 - Modal flow: Add to Cart (adds 1) → View Cart + +/- selector → plus adds more, minus removes.
+
+---
+Task ID: FIX-LOCATION-PLACEHOLDERS
+Agent: Main (Z.ai Code)
+Task: Remove default location (show detect option instead) + replace all example-data placeholders with "Enter your..." style.
+
+Work Log:
+- Location: changed DEFAULT_LOCATION from "Bandra West, Mumbai 400050" to "" (empty). When no location is set:
+  * Header location button shows "Set location" + "Tap to set location" in amber color (instead of "Deliver to" + a city name).
+  * LocationModal header shows "No location set yet — detect or enter below" (instead of "Current: ...").
+  * MapPin icon turns amber when no location is set, green when set.
+  * User must click the location button → opens modal → either "Detect my live location" or manually enter area/city/pincode.
+- Placeholders: replaced ALL example-data placeholders with "Enter your..." style across all forms:
+  * AuthModal: "Riya Patel"→"Enter your full name", "you@example.com"→"Enter your email", "98765 43210"→"Enter your phone number", "••••••••"→"Enter your password"
+  * ContactModal: "Your name"→"Enter your name", "you@example.com"→"Enter your email", "98765 43210"→"Enter your phone number", "How can we help?"→"Enter the subject", "Write your message..."→"Write your message here"
+  * LocationModal: "e.g. Bandra West"→"Enter your area or locality", "Mumbai"→"Enter your city", "400050"→"Enter 6-digit pincode"
+  * CheckoutModal address: added "Enter full name", "Enter 10-digit mobile number", "Enter alternate number", "Enter house or flat number", "Enter street name", "Enter area or locality", "Enter nearby landmark", "Enter city", "Enter state", "Enter 6-digit pincode" (fields that had no placeholder now have one)
+  * CheckoutModal payment: "1234 5678 9012 3456"→"Enter 16-digit card number", "As on card"→"Enter name as on card", "08/27"→"Enter expiry month/year", "•••"→"Enter CVV", "yourname@upi"→"Enter your UPI ID"
+  * Footer newsletter: "Your email"→"Enter your email"
+  * Newsletter section: "Enter your email address"→"Enter your email address to subscribe"
+- Lint passes clean (0 errors).
+- Agent Browser verified:
+  * Header shows "Set location / Tap to set location" (amber) when no location is set.
+  * LocationModal shows "No location set yet — detect or enter below".
+  * All signup form placeholders: "Enter your full name | Enter your email | Enter your phone number | Enter your password"
+  * No example data (names, emails, phone numbers, addresses, card numbers) in any placeholder.
+  * No console errors.
+
+Stage Summary:
+- No more default location — user must detect or enter their location (header shows "Tap to set location" in amber until set).
+- All form placeholders now use "Enter your..." style instead of example data.

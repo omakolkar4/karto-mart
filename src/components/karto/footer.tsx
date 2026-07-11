@@ -47,7 +47,7 @@ export function Footer() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email"
+              placeholder="Enter your email"
               className="h-11 flex-1 rounded-full border border-border bg-card px-4 text-sm outline-none focus:border-karto-green"
             />
             <button className="flex h-11 items-center gap-1.5 rounded-full bg-karto-green px-4 text-sm font-bold text-white transition hover:bg-karto-green/90">
