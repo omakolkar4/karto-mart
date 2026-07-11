@@ -127,6 +127,8 @@ export function Hero() {
                   onError={(e) => { e.currentTarget.style.display = "none"; }}
                 />
               </div>
+              {/* dark-mode tint so the bright photo blends with the dark hero background */}
+              <div className="absolute inset-0 bg-black/0 dark:bg-black/60" />
               <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-transparent" />
               <motion.div
                 initial={{ opacity: 0, y: 10 }}

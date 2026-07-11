@@ -349,3 +349,33 @@ Work Log:
 Stage Summary:
 - No more default location — user must detect or enter their location (header shows "Tap to set location" in amber until set).
 - All form placeholders now use "Enter your..." style instead of example data.
+
+---
+Task ID: FIX-LOCATION-DENY-DARKMODE
+Agent: Main (Z.ai Code)
+Task: Fix location auto-detecting after denial + fix white hero image in dark mode.
+
+Work Log:
+- Issue 1: When the user denied location permission, the app kept showing a detected location (Wagholi) and the AutoLocationDetect kept re-running because the locationDetected flag was never set on denial.
+  Fix: Rewrote AutoLocationDetect to:
+  * Use sessionStorage flag `karto_location_asked` — only asks ONCE per browser session, never auto-retries.
+  * Check the Permissions API (`navigator.permissions.query`) — only shows the browser prompt if the permission state is "prompt" (not already granted/denied). If the user previously denied, it won't bother them again.
+  * On denial: shows a gentle toast "Location permission denied — Click the location icon in the header to set your delivery address." and sets NO default location.
+  * The location stays empty ("Tap to set location") until the user manually sets it via the LocationModal.
+  * Moved store hooks to the top level (fixed react-hooks/immutability lint error).
+
+- Issue 2: In dark mode, the hero feature image (/karto/hero.png — a bright grocery photo) appeared as a bright/white block against the dark hero background, creating a jarring visual.
+  Fix: Added a dark-mode-only tint overlay `bg-black/0 dark:bg-black/60` on top of the hero image. In light mode it's transparent (0%), in dark mode it's 60% black — so the bright photo blends with the dark background instead of looking like a white block. The existing gradient overlay (from-foreground/70 at the bottom) remains for the delivery badge legibility.
+  * VLM verified: "the hero image is integrated with the dark background rather than being a bright white block."
+
+- Lint passes clean (0 errors).
+- Agent Browser verified:
+  * Location shows "Set location / Tap to set location" — no auto-detect, no default city.
+  * sessionStorage `karto_location_asked` = "1" (only asks once).
+  * localStorage location is empty (no Wagholi or any default).
+  * Dark mode hero image blends with the dark background (VLM confirmed).
+  * No console errors.
+
+Stage Summary:
+- Location: asks for permission ONCE (via browser prompt only if state is "prompt"). On denial, never auto-retries, shows no default location — user must manually set it from the header.
+- Dark mode: hero image now has a 60% black tint so it blends with the dark theme (no more white block).
