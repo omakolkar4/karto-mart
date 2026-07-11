@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useStore } from "@/components/karto/store";
+import { AutoLocationDetect } from "@/components/karto/auto-location-detect";
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -11,10 +12,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     // Global Escape handler: closes whichever overlay is open (top-most first).
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      // Don't hijack Escape while typing in a field that needs it (let default).
       const s = useStore.getState();
       if (s.searchOpen) { s.setSearchOpen(false); return; }
       if (s.checkoutOpen) { s.setCheckoutOpen(false); return; }
+      if (s.locationModalOpen) { s.setLocationModalOpen(false); return; }
+      if (s.categoriesDrawerOpen) { s.setCategoriesDrawerOpen(false); return; }
       if (s.authOpen) { s.setAuthOpen(false); return; }
       if (s.accountOpen) { s.setAccountOpen(false); return; }
       if (s.contactOpen) { s.setContactOpen(false); return; }
@@ -27,8 +29,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Render children always; components guard persisted values with useHydrated().
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <AutoLocationDetect />
+    </>
+  );
 }
 
 /** Hook to know when persisted state has been rehydrated on the client. */

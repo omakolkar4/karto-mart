@@ -69,10 +69,15 @@ type UIState = {
   accountOpen: boolean;
   checkoutOpen: boolean;
   contactOpen: boolean;
+  locationModalOpen: boolean;
+  categoriesDrawerOpen: boolean;
   productModalId: string | null;
   lastOrder: Order | null;
   selectedCategory: string | null;
+  view: "home" | "category";
+  activeCategory: string | null;
   location: string;
+  locationDetected: boolean;
   searchInitialQuery: string;
 };
 
@@ -84,7 +89,7 @@ type StoreState = UIState & {
   orders: Order[];
   addresses: Address[];
   appliedCoupon: (Coupon & { _id: string }) | null;
-  location: string;
+  notifiedProducts: string[];
 
   // UI setters
   setCartOpen: (v: boolean) => void;
@@ -95,11 +100,17 @@ type StoreState = UIState & {
   setAccountOpen: (v: boolean) => void;
   setCheckoutOpen: (v: boolean) => void;
   setContactOpen: (v: boolean) => void;
+  setLocationModalOpen: (v: boolean) => void;
+  setCategoriesDrawerOpen: (v: boolean) => void;
   openProduct: (id: string | null) => void;
   setLastOrder: (o: Order | null) => void;
   setSelectedCategory: (c: string | null) => void;
+  navigateToCategory: (c: string) => void;
+  navigateHome: () => void;
   setLocation: (l: string) => void;
+  setLocationDetected: (v: boolean) => void;
   setHydrated: () => void;
+  toggleNotify: (productId: string) => void;
 
   // cart actions
   addToCart: (product: Product, qty?: number) => void;
@@ -147,10 +158,15 @@ export const useStore = create<StoreState>()(
       accountOpen: false,
       checkoutOpen: false,
       contactOpen: false,
+      locationModalOpen: false,
+      categoriesDrawerOpen: false,
       productModalId: null,
       lastOrder: null,
       selectedCategory: null,
+      view: "home",
+      activeCategory: null,
       location: DEFAULT_LOCATION,
+      locationDetected: false,
       searchInitialQuery: "",
       _hasHydrated: false,
 
@@ -160,6 +176,7 @@ export const useStore = create<StoreState>()(
       orders: [],
       addresses: [],
       appliedCoupon: null,
+      notifiedProducts: [],
 
       setCartOpen: (v) => set({ cartOpen: v }),
       setWishlistOpen: (v) => set({ wishlistOpen: v }),
@@ -169,11 +186,27 @@ export const useStore = create<StoreState>()(
       setAccountOpen: (v) => set({ accountOpen: v }),
       setCheckoutOpen: (v) => set({ checkoutOpen: v }),
       setContactOpen: (v) => set({ contactOpen: v }),
+      setLocationModalOpen: (v) => set({ locationModalOpen: v }),
+      setCategoriesDrawerOpen: (v) => set({ categoriesDrawerOpen: v }),
       openProduct: (id) => set({ productModalId: id }),
       setLastOrder: (o) => set({ lastOrder: o }),
       setSelectedCategory: (c) => set({ selectedCategory: c }),
+      navigateToCategory: (c) => {
+        set({ view: "category", activeCategory: c, selectedCategory: c });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      },
+      navigateHome: () => {
+        set({ view: "home", activeCategory: null, selectedCategory: null });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      },
       setLocation: (l) => set({ location: l }),
+      setLocationDetected: (v) => set({ locationDetected: v }),
       setHydrated: () => set({ _hasHydrated: true }),
+      toggleNotify: (productId) => {
+        const list = get().notifiedProducts;
+        if (list.includes(productId)) set({ notifiedProducts: list.filter((x) => x !== productId) });
+        else set({ notifiedProducts: [...list, productId] });
+      },
 
       addToCart: (product, qty = 1) => {
         const cart = [...get().cart];

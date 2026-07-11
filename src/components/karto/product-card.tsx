@@ -1,12 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Heart, Plus, Clock, Star } from "lucide-react";
+import { Heart, Plus, Clock, Star, Bell } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/data/products";
 import { discountPct } from "@/data/products";
 import { useStore } from "@/components/karto/store";
-import { ProductImage, Stars, QuantitySelector } from "@/components/karto/primitives";
+import { ProductImage, QuantitySelector } from "@/components/karto/primitives";
 import { formatPrice } from "@/lib/format";
 import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
@@ -18,11 +18,14 @@ export function ProductCard({ product }: { product: Product }) {
   const decQty = useStore((s) => s.decQty);
   const wishlist = useStore((s) => s.wishlist);
   const toggleWishlist = useStore((s) => s.toggleWishlist);
+  const notifiedProducts = useStore((s) => s.notifiedProducts);
+  const toggleNotify = useStore((s) => s.toggleNotify);
   const openProduct = useStore((s) => s.openProduct);
 
   const inWishlist = wishlist.includes(product.id);
   const pct = discountPct(product);
   const out = !product.inStock;
+  const notified = notifiedProducts.includes(product.id);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -30,6 +33,16 @@ export function ProductCard({ product }: { product: Product }) {
     addToCart(product, 1);
     analytics.addToCart(product.id, product.price);
     toast.success("Added to cart", { description: product.name, duration: 1800 });
+  };
+
+  const handleNotify = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleNotify(product.id);
+    if (!notified) {
+      toast.success("We'll notify you!", { description: `You'll get an alert when ${product.name} is back in stock.`, duration: 3000 });
+    } else {
+      toast("Notification removed", { description: product.name });
+    }
   };
 
   const handleWish = (e: React.MouseEvent) => {
@@ -126,21 +139,29 @@ export function ProductCard({ product }: { product: Product }) {
             )}
           </div>
 
-          {cartQty > 0 ? (
+          {out ? (
+            <button
+              onClick={handleNotify}
+              aria-label="Notify me when available"
+              className={cn(
+                "flex h-9 items-center gap-1 rounded-lg border-2 px-2.5 text-[10px] font-bold uppercase tracking-wide transition active:scale-95",
+                notified
+                  ? "border-karto-green bg-karto-green/10 text-karto-green"
+                  : "border-amber-400 text-amber-600 hover:bg-amber-400 hover:text-white"
+              )}
+            >
+              <Bell className={cn("h-3 w-3", notified && "fill-karto-green")} />
+              {notified ? "Notified" : "Notify"}
+            </button>
+          ) : cartQty > 0 ? (
             <QuantitySelector qty={cartQty} onInc={() => incQty(product.id)} onDec={() => decQty(product.id)} size="sm" />
           ) : (
             <button
               onClick={handleAdd}
-              disabled={out}
               aria-label="Add to cart"
-              className={cn(
-                "flex h-9 items-center gap-1 rounded-lg border-2 px-3 text-xs font-bold uppercase tracking-wide transition active:scale-95",
-                out
-                  ? "cursor-not-allowed border-border text-muted-foreground"
-                  : "border-karto-green text-karto-green hover:bg-karto-green hover:text-white"
-              )}
+              className="flex h-9 items-center gap-1 rounded-lg border-2 border-karto-green px-3 text-xs font-bold uppercase tracking-wide text-karto-green transition hover:bg-karto-green hover:text-white active:scale-95"
             >
-              {out ? "—" : <><Plus className="h-3.5 w-3.5" />ADD</>}
+              <Plus className="h-3.5 w-3.5" />ADD
             </button>
           )}
         </div>

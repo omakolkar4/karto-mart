@@ -116,18 +116,21 @@ export function QuantitySelector({
   onInc,
   onDec,
   size = "md",
+  stopProp = true,
 }: {
   qty: number;
   onInc: () => void;
   onDec: () => void;
   size?: "sm" | "md";
+  stopProp?: boolean;
 }) {
   const h = size === "sm" ? "h-8" : "h-9";
   const btn = size === "sm" ? "w-8" : "w-9";
+  const stop = stopProp ? (e: React.MouseEvent) => e.stopPropagation() : undefined;
   return (
-    <div className={cn("inline-flex items-center rounded-full border border-border bg-card", h)}>
+    <div className={cn("inline-flex items-center rounded-full border border-border bg-card", h)} onClick={stop}>
       <button
-        onClick={onDec}
+        onClick={(e) => { stop?.(e); onDec(); }}
         aria-label="Decrease quantity"
         className={cn("flex h-full items-center justify-center rounded-l-full text-muted-foreground transition hover:text-karto-green", btn)}
       >
@@ -135,7 +138,7 @@ export function QuantitySelector({
       </button>
       <span className="min-w-7 text-center text-sm font-semibold tabular-nums">{qty}</span>
       <button
-        onClick={onInc}
+        onClick={(e) => { stop?.(e); onInc(); }}
         aria-label="Increase quantity"
         className={cn("flex h-full items-center justify-center rounded-r-full text-muted-foreground transition hover:text-karto-green", btn)}
       >

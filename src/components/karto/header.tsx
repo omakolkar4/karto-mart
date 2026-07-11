@@ -1,16 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, ShoppingCart, Heart, User, MapPin, Menu, X, Moon, Sun, ChevronDown, Phone, Navigation, Loader2,
+  Search, ShoppingCart, Heart, User, MapPin, Menu, X, Moon, Sun, ChevronDown, Phone,
 } from "lucide-react";
 import { useStore } from "@/components/karto/store";
 import { categories } from "@/data/categories";
 import { useTheme } from "next-themes";
-import { toast } from "sonner";
 import { analytics } from "@/lib/analytics";
-import { detectLocation } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -23,39 +20,27 @@ export function Header() {
   const setAuthOpen = useStore((s) => s.setAuthOpen);
   const setAccountOpen = useStore((s) => s.setAccountOpen);
   const setContactOpen = useStore((s) => s.setContactOpen);
-  const selectedCategory = useStore((s) => s.selectedCategory);
-  const setSelectedCategory = useStore((s) => s.setSelectedCategory);
   const location = useStore((s) => s.location);
-  const setLocation = useStore((s) => s.setLocation);
+  const setLocationModalOpen = useStore((s) => s.setLocationModalOpen);
+  const setCategoriesDrawerOpen = useStore((s) => s.setCategoriesDrawerOpen);
+  const navigateToCategory = useStore((s) => s.navigateToCategory);
+  const navigateHome = useStore((s) => s.navigateHome);
+  const view = useStore((s) => s.view);
+  const activeCategory = useStore((s) => s.activeCategory);
   const { theme, setTheme } = useTheme();
 
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [detecting, setDetecting] = useState(false);
   const [headerQuery, setHeaderQuery] = useState("");
   // Stable search placeholder to avoid hydration mismatch; rotated client-side only.
   const [placeholder, setPlaceholder] = useState("fresh fruits");
 
-  const handleDetect = async () => {
-    setDetecting(true);
-    try {
-      const result = await detectLocation();
-      setLocation(result.short);
-      toast.success("Location detected", { description: result.short, duration: 2500 });
-    } catch (err) {
-      toast.error("Couldn't detect location", {
-        description: err instanceof Error ? err.message : "Please enable location permission.",
-      });
-    } finally {
-      setDetecting(false);
-    }
-  };
-
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const ideas = ["fresh fruits", "milk", "bananas", "chips", "bread", "chocolate", "onions", "coffee", "diapers", "paneer"];
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPlaceholder(ideas[Math.floor(Math.random() * ideas.length)]);
   }, []);
 
@@ -65,18 +50,9 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    setMobileOpen(false);
-  };
-
   const handleCategoryClick = (catId: string) => {
-    setSelectedCategory(selectedCategory === catId ? null : catId);
+    navigateToCategory(catId);
     analytics.categoryClick(catId);
-    const el = document.getElementById("catalog");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    setMobileOpen(false);
   };
 
   return (
@@ -107,19 +83,19 @@ export function Header() {
         </div>
 
         {/* main bar */}
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-3 py-3 sm:px-6">
-          {/* mobile menu */}
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-6">
+          {/* hamburger menu — all screens, opens categories drawer */}
           <button
-            className="rounded-lg p-2 text-foreground hover:bg-muted md:hidden"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
+            className="rounded-lg p-2 text-foreground transition hover:bg-muted"
+            onClick={() => setCategoriesDrawerOpen(true)}
+            aria-label="All categories"
           >
             <Menu className="h-5 w-5" />
           </button>
 
           {/* logo */}
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => navigateHome()}
             className="flex shrink-0 items-center gap-2"
             aria-label="Karto home"
           >
@@ -131,28 +107,27 @@ export function Header() {
             </span>
           </button>
 
-          {/* location */}
+          {/* location — opens location modal */}
           <button
-            onClick={handleDetect}
-            disabled={detecting}
-            className="hidden items-center gap-2 rounded-lg px-2 py-1.5 text-left transition hover:bg-muted disabled:opacity-60 lg:flex"
-            aria-label="Detect my location"
+            onClick={() => setLocationModalOpen(true)}
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition hover:bg-muted"
+            aria-label="Choose location"
           >
-            {detecting ? <Loader2 className="h-4 w-4 animate-spin text-karto-green" /> : <MapPin className="h-4 w-4 text-karto-green" />}
+            <MapPin className="h-4 w-4 shrink-0 text-karto-green" />
             <div className="leading-tight">
               <p className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                Deliver to <Navigation className="h-2.5 w-2.5" />
+                Deliver to <ChevronDown className="h-2.5 w-2.5" />
               </p>
-              <p className="flex max-w-44 items-center gap-1 truncate text-xs font-semibold">
-                {detecting ? "Detecting..." : location} {!detecting && <ChevronDown className="h-3 w-3" />}
+              <p className="flex max-w-32 items-center gap-1 truncate text-xs font-semibold sm:max-w-44">
+                {location}
               </p>
             </div>
           </button>
 
-          {/* search (desktop) — inline input that carries the query into the search modal */}
+          {/* search — inline input that carries the query into the search modal */}
           <form
             onSubmit={(e) => { e.preventDefault(); openSearch(headerQuery); }}
-            className="group mx-1 flex h-11 flex-1 items-center gap-2 rounded-full border border-border bg-card px-4 transition hover:border-karto-green/50 focus-within:border-karto-green focus-within:shadow-sm"
+            className="group mx-1 flex h-10 flex-1 items-center gap-2 rounded-full border border-border bg-card px-4 transition hover:border-karto-green/50 focus-within:border-karto-green focus-within:shadow-sm sm:h-11"
           >
             <Search className="h-4 w-4 shrink-0 text-muted-foreground group-focus-within:text-karto-green" />
             <input
@@ -217,16 +192,16 @@ export function Header() {
           </div>
         </div>
 
-        {/* category nav (desktop) — horizontally scrollable, compact */}
-        <nav className="hidden border-t border-border md:block">
-          <div className="hide-scrollbar mx-auto flex max-w-7xl items-center gap-0.5 overflow-x-auto px-4 py-1">
+        {/* category nav — horizontally scrollable, compact */}
+        <nav className="hide-scrollbar hidden border-t border-border md:block">
+          <div className="mx-auto flex max-w-7xl items-center gap-0.5 overflow-x-auto px-4 py-1">
             {categories.map((c) => (
               <button
                 key={c.id}
                 onClick={() => handleCategoryClick(c.id)}
                 className={cn(
                   "flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium transition",
-                  selectedCategory === c.id
+                  view === "category" && activeCategory === c.id
                     ? "bg-karto-green/10 text-karto-green"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
@@ -235,92 +210,9 @@ export function Header() {
                 {c.short}
               </button>
             ))}
-            <button
-              onClick={() => scrollToSection("catalog")}
-              className="ml-1 shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold text-karto-green hover:bg-karto-green/10"
-            >
-              All →
-            </button>
           </div>
         </nav>
       </header>
-
-      {/* mobile drawer */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 z-[70] bg-black/40 md:hidden"
-            />
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed left-0 top-0 z-[71] flex h-full w-72 flex-col bg-background shadow-2xl md:hidden"
-            >
-              <div className="flex items-center justify-between border-b border-border p-4">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-karto-green font-black text-white">K</span>
-                  <span className="text-lg font-black">Kart<span className="text-karto-green">o</span></span>
-                </div>
-                <button onClick={() => setMobileOpen(false)} className="rounded-lg p-2 hover:bg-muted">
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 border-b border-border p-4 text-sm">
-                <MapPin className="h-4 w-4 text-karto-green" />
-                <span className="truncate font-medium">{location}</span>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-3">
-                <button
-                  onClick={() => { openSearch(); setMobileOpen(false); }}
-                  className="mb-3 flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground"
-                >
-                  <Search className="h-4 w-4" /> Search products...
-                </button>
-
-                <p className="px-2 pb-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Categories</p>
-                <div className="grid grid-cols-1 gap-0.5">
-                  {categories.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => handleCategoryClick(c.id)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition",
-                        selectedCategory === c.id ? "bg-karto-green/10 text-karto-green" : "hover:bg-muted"
-                      )}
-                    >
-                      <span className="text-lg">{c.emoji}</span> {c.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t border-border p-3">
-                <button
-                  onClick={() => { if (user) setAccountOpen(true); else setAuthOpen(true); setMobileOpen(false); }}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                >
-                  <User className="h-4 w-4" /> {user ? "My Account" : "Login / Sign up"}
-                </button>
-                <button
-                  onClick={() => { setContactOpen(true); setMobileOpen(false); }}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                >
-                  <Phone className="h-4 w-4" /> Help & Support
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </>
   );
 }

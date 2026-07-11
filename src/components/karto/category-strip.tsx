@@ -7,13 +7,11 @@ import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 export function CategoryStrip() {
-  const selectedCategory = useStore((s) => s.selectedCategory);
-  const setSelectedCategory = useStore((s) => s.setSelectedCategory);
+  const navigateToCategory = useStore((s) => s.navigateToCategory);
 
   const handle = (id: string) => {
-    setSelectedCategory(selectedCategory === id ? null : id);
+    navigateToCategory(id);
     analytics.categoryClick(id);
-    document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -41,7 +39,7 @@ export function CategoryStrip() {
               className={cn(
                 "relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border bg-gradient-to-br transition group-hover:shadow-md",
                 c.gradient,
-                selectedCategory === c.id ? "border-karto-green ring-2 ring-karto-green/30" : "border-border"
+                "border-border"
               )}
             >
               {c.image ? (

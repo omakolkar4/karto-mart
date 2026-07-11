@@ -4,9 +4,9 @@ import { useMemo } from "react";
 import { Header } from "@/components/karto/header";
 import { Hero } from "@/components/karto/hero";
 import { CategoryStrip } from "@/components/karto/category-strip";
-import { Catalog } from "@/components/karto/catalog";
 import { ProductRail } from "@/components/karto/product-rail";
 import { FlashSale } from "@/components/karto/flash-sale";
+import { CategoryPage } from "@/components/karto/category-page";
 import {
   Brands, WhyChooseUs, Stats, Reviews, Offers, DownloadApp, Newsletter, BestDeals,
 } from "@/components/karto/marketing-sections";
@@ -20,10 +20,15 @@ import { CheckoutModal } from "@/components/karto/checkout-modal";
 import { OrderSuccessModal } from "@/components/karto/order-success-modal";
 import { AccountModal } from "@/components/karto/account-modal";
 import { ContactModal } from "@/components/karto/contact-modal";
+import { LocationModal } from "@/components/karto/location-modal";
+import { CategoriesDrawer } from "@/components/karto/categories-drawer";
 import { ErrorBoundary } from "@/components/karto/error-boundary";
+import { useStore } from "@/components/karto/store";
 import { products } from "@/data/products";
 
 export default function Home() {
+  const view = useStore((s) => s.view);
+
   const featured = useMemo(() => products.filter((p) => p.isFeatured), []);
   const bestSellers = useMemo(() => products.filter((p) => p.isBestSeller), []);
   const newArrivals = useMemo(() => products.filter((p) => p.isNew), []);
@@ -34,70 +39,77 @@ export default function Home() {
       <ErrorBoundary>
         <Header />
         <main className="flex-1">
-          <Hero />
+          {view === "category" ? (
+            // CATEGORY VIEW — dedicated page for the selected category (like Zepto)
+            <CategoryPage />
+          ) : (
+            // HOME VIEW — trends, deals, best sellers (no full catalog)
+            <>
+              <Hero />
 
-          {/* Best deals promo strip — right at the top */}
-          <BestDeals />
+              {/* Best deals promo strip — right at the top */}
+              <BestDeals />
 
-          <CategoryStrip />
+              <CategoryStrip />
 
-          {bestSellers.length > 0 && (
-            <ProductRail
-              id="bestsellers"
-              eyebrow="Most loved"
-              title="Best Sellers"
-              subtitle="Top-rated products flying off our shelves"
-              products={bestSellers}
-            />
+              {bestSellers.length > 0 && (
+                <ProductRail
+                  id="bestsellers"
+                  eyebrow="Most loved"
+                  title="Best Sellers"
+                  subtitle="Top-rated products flying off our shelves"
+                  products={bestSellers}
+                />
+              )}
+
+              <FlashSale />
+
+              {featured.length > 0 && (
+                <ProductRail
+                  id="featured"
+                  eyebrow="Handpicked for you"
+                  title="Featured Products"
+                  subtitle="Trending favourites our customers love right now"
+                  products={featured}
+                />
+              )}
+
+              {newArrivals.length > 0 && (
+                <ProductRail
+                  id="new-arrivals"
+                  eyebrow="Just landed"
+                  title="New Arrivals"
+                  subtitle="Fresh additions to the Karto catalog"
+                  products={newArrivals}
+                />
+              )}
+
+              <Offers />
+
+              {todaysOffers.length > 0 && (
+                <ProductRail
+                  id="today-offers"
+                  eyebrow="Save big today"
+                  title="Today's Offers"
+                  subtitle="Biggest discounts on everyday essentials"
+                  products={todaysOffers}
+                />
+              )}
+
+              <Brands />
+              <WhyChooseUs />
+              <Stats />
+              <Reviews />
+              <DownloadApp />
+              <Newsletter />
+            </>
           )}
-
-          <FlashSale />
-
-          {featured.length > 0 && (
-            <ProductRail
-              id="featured"
-              eyebrow="Handpicked for you"
-              title="Featured Products"
-              subtitle="Trending favourites our customers love right now"
-              products={featured}
-            />
-          )}
-
-          <Catalog />
-
-          {newArrivals.length > 0 && (
-            <ProductRail
-              id="new-arrivals"
-              eyebrow="Just landed"
-              title="New Arrivals"
-              subtitle="Fresh additions to the Karto catalog"
-              products={newArrivals}
-            />
-          )}
-
-          <Offers />
-
-          {todaysOffers.length > 0 && (
-            <ProductRail
-              id="today-offers"
-              eyebrow="Save big today"
-              title="Today's Offers"
-              subtitle="Biggest discounts on everyday essentials"
-              products={todaysOffers}
-            />
-          )}
-
-          <Brands />
-          <WhyChooseUs />
-          <Stats />
-          <Reviews />
-          <DownloadApp />
-          <Newsletter />
         </main>
 
         <Footer />
 
         {/* Overlays */}
+        <CategoriesDrawer />
         <CartDrawer />
         <WishlistDrawer />
         <SearchModal />
@@ -107,6 +119,7 @@ export default function Home() {
         <OrderSuccessModal />
         <AccountModal />
         <ContactModal />
+        <LocationModal />
       </ErrorBoundary>
     </div>
   );

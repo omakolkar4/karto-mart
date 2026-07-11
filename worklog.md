@@ -164,3 +164,45 @@ Work Log:
 Stage Summary:
 - Hero right side is clean and uncluttered (feature image + 2x2 category tiles + trending strip, no overlapping elements).
 - Search is now one continuous flow: type in hero OR header search bar → query carries into the search modal → results show immediately. No more redundant empty second search bar.
+
+---
+Task ID: 8
+Agent: Main (Z.ai Code)
+Task: Zepto-style navigation, auto-detect location, remove hero search/detect, fix cart auto-open, add Notify Me for out-of-stock.
+
+Work Log:
+- Store: added view state (home/category), activeCategory, navigateToCategory(), navigateHome(), locationModalOpen, categoriesDrawerOpen, notifiedProducts[], toggleNotify(), locationDetected flag.
+- AutoLocationDetect component: on app mount, automatically calls detectLocation() after 1.2s delay. If permission denied, shows a toast telling user to click the location icon. Silently keeps default location otherwise.
+- Hero redesigned: removed search bar and "Detect my location" button (both are in the navbar now). Added "Shop bestsellers" + "Browse categories" CTA buttons. Kept the clean visual grid (feature image + 2x2 category tiles + trending strip). Category tiles now navigate to category page.
+- Header: 
+  * Hamburger menu (3-line icon) visible on ALL screens (not just mobile) — opens CategoriesDrawer sidebar.
+  * Location button now opens LocationModal (instead of auto-detecting).
+  * Logo click calls navigateHome() (switches to home view + scrolls to top).
+  * Category nav bar uses activeCategory for highlight state.
+  * Removed old mobile drawer (replaced by CategoriesDrawer).
+- CategoriesDrawer: left sidebar with all 15 categories (real images + emoji), Home button, click navigates to category page. Like Zepto's left sidebar.
+- LocationModal: "Detect my live location" button + manual entry form (Area, City, Pincode, Address Type: Home/Work/Other). Sets location and closes.
+- CategoryPage: dedicated category view (like Zepto) — breadcrumb (Home / Category), category header banner with image, related category chips, filter sidebar (sort/brand/price/rating), product grid. Replaces the old Catalog scroll.
+- Home view: Hero → BestDeals → CategoryStrip → BestSellers → FlashSale → Featured → NewArrivals → Offers → TodayOffers → Brands → WhyChooseUs → Stats → Reviews → DownloadApp → Newsletter. No full catalog (removed).
+- Product card fixes:
+  * QuantitySelector: added stopProp=true by default, so clicking +/- no longer bubbles up to open the product modal. THE AUTO-OPEN BUG IS FIXED.
+  * Out-of-stock products: replaced disabled "—" button with "Notify Me" button (amber bell icon). Clicking toggles notified state + shows toast "We'll notify you when [product] is back in stock." Notified state shows green "Notified" button.
+- Footer: updated to use navigateToCategory/navigateHome instead of scroll.
+- Lint passes clean (0 errors).
+- Agent Browser verified:
+  * Hamburger menu opens CategoriesDrawer with all categories.
+  * Location button opens LocationModal with detect + manual entry.
+  * Clicking a category navigates to dedicated CategoryPage (breadcrumb, header, filters, grid).
+  * Logo click returns to home view.
+  * No search bar or "Detect my location" in hero.
+  * Quantity selector +/- does NOT open product modal (FIXED).
+  * Out-of-stock products show "Notify me when available" button (FIXED).
+  * No console/hydration errors.
+
+Stage Summary:
+- Zepto-style navigation: hamburger menu → categories sidebar → dedicated category pages.
+- Auto-detect location on page load (asks permission if needed).
+- Location modal with detect live + manual address entry.
+- Hero cleaned up (no redundant search/detect — those are in navbar).
+- Cart quantity selector no longer auto-opens product modal.
+- Out-of-stock products show "Notify Me" instead of allowing add to cart.

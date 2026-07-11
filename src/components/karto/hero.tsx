@@ -1,52 +1,23 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search, MapPin, Clock, ShieldCheck, Zap, Navigation, Loader2, TrendingUp, ArrowRight } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Zap, Clock, ShieldCheck, TrendingUp, Star, ArrowRight } from "lucide-react";
 import { useStore } from "@/components/karto/store";
 import { products } from "@/data/products";
-import { analytics } from "@/lib/analytics";
-import { detectLocation } from "@/lib/geo";
 import { categoryImages } from "@/data/image-map";
 import { categories } from "@/data/categories";
 import { formatPrice } from "@/lib/format";
+import { analytics } from "@/lib/analytics";
 
 export function Hero() {
-  const openSearch = useStore((s) => s.openSearch);
-  const location = useStore((s) => s.location);
-  const setLocation = useStore((s) => s.setLocation);
-  const [q, setQ] = useState("");
-  const [detecting, setDetecting] = useState(false);
+  const navigateToCategory = useStore((s) => s.navigateToCategory);
+  const openProduct = useStore((s) => s.openProduct);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    analytics.search(q);
-    openSearch(q); // carry the query into the search modal
-  };
-
-  const handleDetect = async () => {
-    setDetecting(true);
-    try {
-      const result = await detectLocation();
-      setLocation(result.short);
-      toast.success("Location detected", { description: result.short, duration: 2500 });
-    } catch (err) {
-      toast.error("Couldn't detect location", {
-        description: err instanceof Error ? err.message : "Please enable location permission.",
-        duration: 3000,
-      });
-    } finally {
-      setDetecting(false);
-    }
-  };
-
-  // 4 category tiles for the right grid — pick ones with good images
+  // 4 category tiles for the right grid
   const catTiles = (["fruits", "dairy", "snacks", "bakery"] as const)
     .map((id) => categories.find((c) => c.id === id)!)
     .filter(Boolean);
 
-  // a couple of trending products to show as a strip
   const trending = [products[0], products[18]];
 
   return (
@@ -57,7 +28,7 @@ export function Hero() {
 
       <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:py-14">
         <div className="grid items-center gap-8 lg:grid-cols-12">
-          {/* LEFT — pitch + search + location (span 7) */}
+          {/* LEFT — pitch + trust badges (no search bar, no detect button — those are in the navbar) */}
           <div className="lg:col-span-7">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -89,47 +60,27 @@ export function Hero() {
               Fresh fruits, vegetables, dairy, snacks & daily essentials at your doorstep — at the best prices, every single day.
             </motion.p>
 
-            {/* search */}
-            <motion.form
-              onSubmit={submit}
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.18 }}
-              className="mt-6 flex items-center gap-2 rounded-2xl bg-white p-1.5 shadow-2xl"
-            >
-              <Search className="ml-3 h-5 w-5 shrink-0 text-muted-foreground" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder='Search "milk", "bananas", "chips"...'
-                className="h-11 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-              />
-              <button
-                type="submit"
-                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-karto-green px-5 py-2.5 text-sm font-bold text-white transition hover:bg-karto-green/90 active:scale-95"
-              >
-                Search <ArrowRight className="h-4 w-4" />
-              </button>
-            </motion.form>
-
-            {/* location with detect button */}
+            {/* CTA buttons */}
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.24 }}
-              className="mt-4 flex flex-wrap items-center gap-3"
+              transition={{ duration: 0.55, delay: 0.2 }}
+              className="mt-6 flex flex-wrap gap-3"
             >
-              <div className="flex items-center gap-2 text-sm text-white/70">
-                <MapPin className="h-4 w-4 text-karto-green" />
-                Delivering to <span className="font-semibold text-white">{location}</span>
-              </div>
               <button
-                onClick={handleDetect}
-                disabled={detecting}
-                className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:opacity-60"
+                onClick={() => {
+                  const el = document.getElementById("bestsellers");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="flex items-center gap-2 rounded-xl bg-karto-green px-5 py-3 text-sm font-bold text-white transition hover:bg-karto-green/90 active:scale-95"
               >
-                {detecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Navigation className="h-3.5 w-3.5" />}
-                {detecting ? "Detecting..." : "Detect my location"}
+                Shop bestsellers <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => navigateToCategory("fruits")}
+                className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                Browse categories
               </button>
             </motion.div>
 
@@ -187,7 +138,7 @@ export function Hero() {
               </motion.div>
             </div>
 
-            {/* 2x2 category tiles — clean, labeled, no overlap */}
+            {/* 2x2 category tiles */}
             <div className="grid grid-cols-2 gap-3">
               {catTiles.map((c, i) => (
                 <motion.button
@@ -196,10 +147,7 @@ export function Hero() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4 + i * 0.08, type: "spring", stiffness: 200 }}
                   whileHover={{ y: -3 }}
-                  onClick={() => {
-                    useStore.getState().setSelectedCategory(c.id);
-                    document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
-                  }}
+                  onClick={() => { analytics.categoryClick(c.id); navigateToCategory(c.id); }}
                   className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/10 shadow-lg"
                 >
                   {c.image && (
@@ -232,7 +180,7 @@ export function Hero() {
                 {trending.map((p) => (
                   <button
                     key={p.id}
-                    onClick={() => useStore.getState().openProduct(p.id)}
+                    onClick={() => { analytics.productClick(p.id); openProduct(p.id); }}
                     className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-white/5 p-1.5 transition hover:bg-white/10"
                   >
                     <div className="h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-muted/30">
@@ -240,7 +188,12 @@ export function Hero() {
                     </div>
                     <div className="min-w-0 leading-tight">
                       <p className="truncate text-xs font-semibold text-white">{p.name}</p>
-                      <p className="text-xs font-bold text-karto-green">{formatPrice(p.price)}</p>
+                      <div className="flex items-center gap-1">
+                        <p className="text-xs font-bold text-karto-green">{formatPrice(p.price)}</p>
+                        <span className="flex items-center gap-0.5 text-[10px] text-amber-500">
+                          <Star className="h-2 w-2 fill-amber-400" />{p.rating.toFixed(1)}
+                        </span>
+                      </div>
                     </div>
                   </button>
                 ))}

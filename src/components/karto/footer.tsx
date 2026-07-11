@@ -8,16 +8,19 @@ import { useStore } from "@/components/karto/store";
 import { analytics } from "@/lib/analytics";
 
 export function Footer() {
-  const setSelectedCategory = useStore((s) => s.setSelectedCategory);
+  const navigateToCategory = useStore((s) => s.navigateToCategory);
+  const navigateHome = useStore((s) => s.navigateHome);
   const setContactOpen = useStore((s) => s.setContactOpen);
   const [email, setEmail] = useState("");
 
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const scrollTo = (id: string) => {
+    navigateHome();
+    setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 100);
+  };
 
   const goToCat = (id: string) => {
-    setSelectedCategory(id);
+    navigateToCategory(id);
     analytics.categoryClick(id);
-    scrollTo("catalog");
   };
 
   return (
@@ -101,7 +104,7 @@ export function Footer() {
             <li><button onClick={() => scrollTo("offers")} className="transition hover:text-karto-green">Offers</button></li>
             <li><button onClick={() => scrollTo("flash-sale")} className="transition hover:text-karto-green">Flash Sale</button></li>
             <li><button onClick={() => setContactOpen(true)} className="transition hover:text-karto-green">Contact</button></li>
-            <li><button onClick={() => scrollTo("catalog")} className="transition hover:text-karto-green">All Products</button></li>
+            <li><button onClick={() => goToCat("fruits")} className="transition hover:text-karto-green">All Products</button></li>
           </ul>
         </div>
 
