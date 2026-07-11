@@ -3,7 +3,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { Product } from "@/data/products";
-import { productMap } from "@/data/products";
 import type { Coupon } from "@/data/extras";
 import {
   computeTax,
@@ -12,6 +11,7 @@ import {
   generateOrderId,
   TAX_RATE,
 } from "@/lib/format";
+import { useProductsStore } from "@/lib/products-store";
 
 export type CartItem = { productId: string; qty: number };
 
@@ -134,13 +134,17 @@ type StoreState = UIState & {
   login: (u: User) => void;
   signup: (u: User) => void;
   logout: () => void;
+  loginWithCredentials: (email: string, password: string) => Promise<boolean>;
+  signupWithCredentials: (data: { name: string; email: string; phone?: string; password: string }) => Promise<boolean>;
+  logoutApi: () => Promise<void>;
+  restoreSession: () => Promise<void>;
 
   // addresses
   addAddress: (a: Address) => void;
   removeAddress: (id: string) => void;
 
   // orders
-  placeOrder: (data: { address: Address; slot: string; paymentMethod: string; paymentLabel: string }) => Order | null;
+  placeOrder: (data: { address: Address; slot: string; paymentMethod: string; paymentLabel: string }) => Promise<Order | null>;
   cancelOrder: (orderId: string) => void;
   reorder: (orderId: string) => void;
 };
@@ -270,64 +274,112 @@ export const useStore = create<StoreState>()(
       signup: (u) => set({ user: u }),
       logout: () => set({ user: null, accountOpen: false }),
 
+      loginWithCredentials: async (email, password) => {
+        try {
+          const res = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+          const data = await res.json();
+          if (!res.ok) { throw new Error(data.error || "Login failed"); }
+          set({ user: data.user });
+          return true;
+        } catch { return false; }
+      },
+
+      signupWithCredentials: async (data) => {
+        try {
+          const res = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          const result = await res.json();
+          if (!res.ok) { throw new Error(result.error || "Signup failed"); }
+          set({ user: result.user });
+          return true;
+        } catch { return false; }
+      },
+
+      logoutApi: async () => {
+        try { await fetch("/api/auth/logout", { method: "POST" }); } catch { /* ignore */ }
+        set({ user: null, accountOpen: false });
+      },
+
+      restoreSession: async () => {
+        try {
+          const res = await fetch("/api/auth/me");
+          const data = await res.json();
+          if (data.user) set({ user: data.user });
+        } catch { /* ignore */ }
+      },
+
       addAddress: (a) => set({ addresses: [...get().addresses, a] }),
       removeAddress: (id) => set({ addresses: get().addresses.filter((a) => a.id !== id) }),
 
-      placeOrder: ({ address, slot, paymentMethod, paymentLabel }) => {
+      placeOrder: async ({ address, slot, paymentMethod, paymentLabel }) => {
         const state = get();
         const items = state.cart;
         if (items.length === 0) return null;
-        const orderItems: OrderItem[] = items.map((i) => {
-          const p = productMap[i.productId];
-          return {
-            productId: p.id,
-            name: p.name,
-            price: p.price,
-            qty: i.qty,
-            emoji: p.emoji,
-            gradient: p.gradient,
-            unit: p.unit,
+
+        // Save to database via API (prices resolved server-side from DB for accuracy)
+        try {
+          const res = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              items: items.map((i) => ({ productId: i.productId, qty: i.qty })),
+              address,
+              slot,
+              paymentMethod,
+              paymentLabel,
+              discount: state.appliedCoupon ? (
+                state.appliedCoupon.type === "flat" ? state.appliedCoupon.value :
+                Math.min(state.appliedCoupon.maxDiscount ?? Infinity, Math.round((cartSubtotal(state) * state.appliedCoupon.value) / 100))
+              ) : 0,
+            }),
+          });
+          if (!res.ok) throw new Error("Order failed");
+          const dbOrder = await res.json();
+          const order = dbOrder.order;
+          // Convert DB order shape to local Order type
+          const localOrder: Order = {
+            id: order.shortId || order.id,
+            items: order.items.map((i: Record<string, unknown>) => ({
+              productId: i.productId as string,
+              name: i.name as string,
+              price: i.price as number,
+              qty: i.qty as number,
+              emoji: i.emoji as string,
+              gradient: i.gradient as string,
+              unit: i.unit as string,
+            })),
+            subtotal: order.subtotal,
+            tax: order.tax,
+            delivery: order.delivery,
+            discount: order.discount,
+            total: order.total,
+            address,
+            slot,
+            paymentMethod,
+            paymentLabel,
+            status: order.status,
+            placedAt: new Date(order.placedAt).getTime(),
+            etaMins: order.etaMins,
           };
-        });
-        const subtotal = orderItems.reduce((s, i) => s + i.price * i.qty, 0);
-        const tax = computeTax(subtotal);
-        const delivery = computeDelivery(subtotal);
-        let discount = 0;
-        const coupon = state.appliedCoupon;
-        if (coupon) {
-          if (coupon.type === "flat") discount = coupon.value;
-          else discount = Math.min(coupon.maxDiscount ?? Infinity, Math.round((subtotal * coupon.value) / 100));
+          set({
+            orders: [localOrder, ...state.orders],
+            cart: [],
+            appliedCoupon: null,
+            lastOrder: localOrder,
+            cartOpen: false,
+            checkoutOpen: false,
+          });
+          return localOrder;
+        } catch {
+          return null;
         }
-        const total = Math.max(0, subtotal + tax + delivery - discount);
-        const etaMins = orderItems.reduce((m, i) => {
-          const p = productMap[i.productId];
-          return Math.max(m, p.deliveryMins);
-        }, 15);
-        const order: Order = {
-          id: generateOrderId(),
-          items: orderItems,
-          subtotal,
-          tax,
-          delivery,
-          discount,
-          total,
-          address,
-          slot,
-          paymentMethod,
-          paymentLabel,
-          status: "Placed",
-          placedAt: Date.now(),
-          etaMins,
-        };
-        set({
-          orders: [order, ...state.orders],
-          cart: [],
-          appliedCoupon: null,
-          lastOrder: order,
-          cartOpen: false,
-          checkoutOpen: false,
-        });
-        return order;
       },
 
       cancelOrder: (orderId) =>
@@ -370,9 +422,15 @@ export const useStore = create<StoreState>()(
 );
 
 // ===== Selectors / derived helpers =====
+// Uses the live products store (DB-backed) with static fallback.
+function getLiveProductMap() {
+  return useProductsStore.getState().productMap;
+}
+
 export function cartSubtotal(state: StoreState): number {
+  const pm = getLiveProductMap();
   return state.cart.reduce((s, i) => {
-    const p = productMap[i.productId];
+    const p = pm[i.productId];
     return p ? s + p.price * i.qty : s;
   }, 0);
 }
@@ -393,7 +451,7 @@ export function cartTotals(state: StoreState) {
   }
   const total = Math.max(0, subtotal + tax + delivery - discount);
   const savings = state.cart.reduce((s, i) => {
-    const p = productMap[i.productId];
+    const p = getLiveProductMap()[i.productId];
     return p ? s + (p.mrp - p.price) * i.qty : s;
   }, 0);
   return { subtotal, tax, delivery, discount, total, savings };

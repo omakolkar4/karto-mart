@@ -9,7 +9,7 @@ import {
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useStore, cartTotals, type Address } from "@/components/karto/store";
-import { productMap } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { ProductImage } from "@/components/karto/primitives";
 import { formatPrice, estimatedDelivery, validatePhone, validatePincode, validateCardNumber, validateExpiry, validateCvv } from "@/lib/format";
 import { analytics } from "@/lib/analytics";
@@ -43,6 +43,7 @@ export function CheckoutModal() {
   const placeOrder = useStore((s) => s.placeOrder);
   const setLastOrder = useStore((s) => s.setLastOrder);
   const user = useStore((s) => s.user);
+  const productMap = useProductsStore((s) => s.productMap);
 
   const [step, setStep] = useState(0); // 0..4
   const [selectedAddr, setSelectedAddr] = useState<string | null>(null);
@@ -103,24 +104,31 @@ export function CheckoutModal() {
   };
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
-  const confirmOrder = () => {
+  const confirmOrder = async () => {
     const addr = addresses.find((a) => a.id === selectedAddr);
     if (!addr) { toast.error("No address selected"); return; }
     setPlacing(true);
     const slotObj = SLOTS.find((s) => s.id === slot)!;
     const payLabel = PAYMENTS.find((p) => p.id === payment)!.label;
-    setTimeout(() => {
-      const order = placeOrder({ address: addr, slot: `${slotObj.label} (${slotObj.time})`, paymentMethod: payment, paymentLabel: payLabel });
-      setPlacing(false);
-      if (order) {
-        analytics.purchaseCompleted(order.id, order.total);
-        setLastOrder(order);
-        toast.success("Order placed successfully! 🎉", { description: `Order ${order.id}` });
-        close();
-      } else {
-        toast.error("Could not place order");
-      }
-    }, 1200);
+    // Save the address to the database for the logged-in user
+    try {
+      await fetch("/api/addresses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(addr),
+      });
+    } catch { /* non-critical */ }
+    // Place the order (saves to DB via API)
+    const order = await placeOrder({ address: addr, slot: `${slotObj.label} (${slotObj.time})`, paymentMethod: payment, paymentLabel: payLabel });
+    setPlacing(false);
+    if (order) {
+      analytics.purchaseCompleted(order.id, order.total);
+      setLastOrder(order);
+      toast.success("Order placed successfully! 🎉", { description: `Order ${order.id}` });
+      close();
+    } else {
+      toast.error("Could not place order", { description: "Please try again." });
+    }
   };
 
   const activeAddr = addresses.find((a) => a.id === selectedAddr);

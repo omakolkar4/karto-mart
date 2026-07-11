@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, type Order, type OrderStatus } from "@/components/karto/store";
-import { productMap } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { ProductImage } from "@/components/karto/primitives";
 import { formatPrice, estimatedDeliveryDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -33,11 +33,12 @@ export function AccountModal() {
   const removeAddress = useStore((s) => s.removeAddress);
   const cancelOrder = useStore((s) => s.cancelOrder);
   const reorder = useStore((s) => s.reorder);
-  const logout = useStore((s) => s.logout);
+  const logoutApi = useStore((s) => s.logoutApi);
   const wishlistToCart = useStore((s) => s.wishlistToCart);
   const removeFromWishlist = useStore((s) => s.removeFromWishlist);
   const setWishlistOpen = useStore((s) => s.setWishlistOpen);
   const setAuthOpen = useStore((s) => s.setAuthOpen);
+  const productMap = useProductsStore((s) => s.productMap);
 
   const [tab, setTab] = useState<Tab>("orders");
 
@@ -226,7 +227,7 @@ export function AccountModal() {
                     <p className="font-semibold">Member since</p>
                     <p className="text-muted-foreground">{new Date().toLocaleDateString("en-IN", { month: "long", year: "numeric" })}</p>
                   </div>
-                  <button onClick={() => { logout(); toast("Logged out"); }} className="flex w-full items-center justify-center gap-2 rounded-full border border-red-200 py-3 text-sm font-bold text-red-500 transition hover:bg-red-50">
+                  <button onClick={() => { logoutApi(); toast("Logged out"); }} className="flex w-full items-center justify-center gap-2 rounded-full border border-red-200 py-3 text-sm font-bold text-red-500 transition hover:bg-red-50">
                     <LogOut className="h-4 w-4" /> Logout
                   </button>
                 </div>

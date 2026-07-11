@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, X } from "lucide-react";
-import { products } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { categories, categoryMap } from "@/data/categories";
 import { brands } from "@/data/products";
 import { useStore } from "@/components/karto/store";
@@ -16,6 +16,7 @@ export function Catalog() {
   const selectedCategory = useStore((s) => s.selectedCategory);
   const setSelectedCategory = useStore((s) => s.setSelectedCategory);
   const setSearchOpen = useStore((s) => s.setSearchOpen);
+  const products = useProductsStore((s) => s.products);
 
   const [sort, setSort] = useState<Sort>("popular");
   const [brandFilter, setBrandFilter] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export function Catalog() {
       products.filter((p) => !selectedCategory || p.category === selectedCategory).map((p) => p.brand)
     );
     return Array.from(set);
-  }, [selectedCategory]);
+  }, [selectedCategory, products]);
 
   const filtered = useMemo(() => {
     let list = products.filter((p) => {
@@ -57,7 +58,7 @@ export function Catalog() {
         break;
     }
     return list;
-  }, [selectedCategory, brandFilter, maxPrice, minRating, sort]);
+  }, [selectedCategory, brandFilter, maxPrice, minRating, sort, products]);
 
   const activeCat = selectedCategory ? categoryMap[selectedCategory] : null;
   const shown = filtered.slice(0, visible);

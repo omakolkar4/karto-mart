@@ -15,12 +15,14 @@ export function AuthModal() {
   const setOpen = useStore((s) => s.setAuthOpen);
   const login = useStore((s) => s.login);
   const signup = useStore((s) => s.signup);
+  const loginWithCredentials = useStore((s) => s.loginWithCredentials);
+  const signupWithCredentials = useStore((s) => s.signupWithCredentials);
   const [mode, setMode] = useState<Mode>("login");
   const [showPwd, setShowPwd] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "forgot") {
       if (!validateEmail(form.email)) { toast.error("Enter a valid email"); return; }
@@ -33,24 +35,34 @@ export function AuthModal() {
     if (mode === "signup" && !form.name.trim()) { toast.error("Please enter your name"); return; }
 
     setLoading(true);
-    setTimeout(() => {
-      if (mode === "login") {
-        login({ name: form.name || form.email.split("@")[0].replace(/^\w/, (c) => c.toUpperCase()), email: form.email });
+    if (mode === "login") {
+      const ok = await loginWithCredentials(form.email, form.password);
+      setLoading(false);
+      if (ok) {
         analytics.login();
         toast.success("Welcome back! 👋", { description: "Logged in successfully." });
+        setOpen(false);
+        setForm({ name: "", email: "", phone: "", password: "" });
       } else {
-        signup({ name: form.name, email: form.email, phone: form.phone });
+        toast.error("Login failed", { description: "Invalid email or password. Please try again." });
+      }
+    } else {
+      const ok = await signupWithCredentials({ name: form.name, email: form.email, phone: form.phone, password: form.password });
+      setLoading(false);
+      if (ok) {
         analytics.signup();
         toast.success("Account created! 🎉", { description: "Welcome to Karto." });
+        setOpen(false);
+        setForm({ name: "", email: "", phone: "", password: "" });
+      } else {
+        toast.error("Signup failed", { description: "An account with this email may already exist." });
       }
-      setLoading(false);
-      setOpen(false);
-      setForm({ name: "", email: "", phone: "", password: "" });
-    }, 700);
+    }
   };
 
   const google = () => {
     setLoading(true);
+    // Simulated Google login (would use NextAuth/Firebase in production)
     setTimeout(() => {
       login({ name: "Riya Patel", email: "riya.patel@gmail.com" });
       analytics.login();

@@ -8,7 +8,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/components/karto/store";
-import { getProductById, getRelatedProducts, getFrequentlyBought, discountPct } from "@/data/products";
+import { discountPct, type Product } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { reviews as allReviews } from "@/data/extras";
 import { ProductImage, Stars, QuantitySelector } from "@/components/karto/primitives";
 import { formatPrice, estimatedDelivery } from "@/lib/format";
@@ -28,13 +29,15 @@ export function ProductModal() {
   const setCheckoutOpen = useStore((s) => s.setCheckoutOpen);
   const user = useStore((s) => s.user);
   const setAuthOpen = useStore((s) => s.setAuthOpen);
+  const products = useProductsStore((s) => s.products);
+  const productMap = useProductsStore((s) => s.productMap);
 
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<"desc" | "specs" | "reviews">("desc");
 
-  const product = id ? getProductById(id) : null;
-  const related = useMemo(() => (product ? getRelatedProducts(product, 6) : []), [product]);
-  const fbt = useMemo(() => (product ? getFrequentlyBought(product, 3) : []), [product, id]);
+  const product = id ? productMap[id] : null;
+  const related = useMemo(() => (product ? products.filter((x) => x.category === product.category && x.id !== product.id).slice(0, 6) : []), [product, products]);
+  const fbt = useMemo(() => (product ? products.filter((x) => x.id !== product.id && x.category !== product.category && x.isBestSeller).slice(0, 3) : []), [product, products, id]);
 
   const [fbtSelected, setFbtSelected] = useState<Record<string, boolean>>({});
   const close = () => setId(null);

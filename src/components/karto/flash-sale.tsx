@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Flame, ChevronLeft, ChevronRight } from "lucide-react";
-import { products } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { ProductCard } from "@/components/karto/product-card";
 import { useRef } from "react";
 
@@ -37,6 +37,7 @@ export function FlashSale() {
   }, []);
   const { h, m, s } = useCountdown(target);
   const ref = useRef<HTMLDivElement>(null);
+  const products = useProductsStore((s) => s.products);
   const flash = products.filter((p) => p.isFlashSale).concat(products.filter((p) => p.isBestSeller)).slice(0, 10);
 
   const scroll = (dir: 1 | -1) => {

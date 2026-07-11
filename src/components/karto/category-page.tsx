@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, SlidersHorizontal, X, Star, Clock } from "lucide-react";
 import { useStore } from "@/components/karto/store";
-import { products } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { categoryMap, categories } from "@/data/categories";
 import { ProductCard } from "@/components/karto/product-card";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ export function CategoryPage() {
   const activeCategory = useStore((s) => s.activeCategory);
   const navigateHome = useStore((s) => s.navigateHome);
   const navigateToCategory = useStore((s) => s.navigateToCategory);
+  const products = useProductsStore((s) => s.products);
 
   const [sort, setSort] = useState<Sort>("popular");
   const [brandFilter, setBrandFilter] = useState<string | null>(null);
@@ -27,7 +28,7 @@ export function CategoryPage() {
 
   const categoryBrands = useMemo(() => {
     return Array.from(new Set(products.filter((p) => p.category === activeCategory).map((p) => p.brand)));
-  }, [activeCategory]);
+  }, [activeCategory, products]);
 
   const filtered = useMemo(() => {
     let list = products.filter((p) => {
@@ -44,7 +45,7 @@ export function CategoryPage() {
       case "rating": list = list.sort((a, b) => b.rating - a.rating); break;
     }
     return list;
-  }, [activeCategory, brandFilter, maxPrice, minRating, sort]);
+  }, [activeCategory, brandFilter, maxPrice, minRating, sort, products]);
 
   if (!cat) return null;
 

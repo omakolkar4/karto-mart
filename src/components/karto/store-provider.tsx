@@ -2,12 +2,17 @@
 
 import { useEffect } from "react";
 import { useStore } from "@/components/karto/store";
+import { useProductsStore } from "@/lib/products-store";
 import { AutoLocationDetect } from "@/components/karto/auto-location-detect";
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Manually rehydrate persisted state on the client to avoid SSR mismatch.
     useStore.persist.rehydrate();
+    // Restore user session from the DB (httpOnly cookie auth)
+    useStore.getState().restoreSession();
+    // Fetch live products from the database (replaces static data)
+    useProductsStore.getState().fetchProducts();
 
     // Global Escape handler: closes whichever overlay is open (top-most first).
     const onKey = (e: KeyboardEvent) => {

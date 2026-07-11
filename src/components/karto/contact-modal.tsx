@@ -25,7 +25,7 @@ export function ContactModal() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return toast.error("Please enter your name");
     if (!validateEmail(form.email)) return toast.error("Enter a valid email");
@@ -34,14 +34,25 @@ export function ContactModal() {
     if (form.message.trim().length < 10) return toast.error("Message should be at least 10 characters");
 
     setLoading(true);
-    // In production this would POST to /api/contact and store in Firestore/Prisma.
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to send");
+      }
       analytics.contactFormSubmitted();
       toast.success("Message sent! 🎉", { description: "Our team will get back to you within 24 hours." });
       setForm({ name: "", email: "", phone: "", subject: "", message: "" });
       setOpen(false);
-    }, 800);
+    } catch (err) {
+      toast.error("Could not send message", { description: err instanceof Error ? err.message : "Please try again." });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

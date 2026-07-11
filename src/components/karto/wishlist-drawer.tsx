@@ -5,7 +5,8 @@ import { X, Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useStore } from "@/components/karto/store";
-import { productMap, discountPct } from "@/data/products";
+import { discountPct, type Product } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { ProductImage, Stars } from "@/components/karto/primitives";
 import { formatPrice } from "@/lib/format";
 import { analytics } from "@/lib/analytics";
@@ -17,6 +18,7 @@ export function WishlistDrawer() {
   const removeFromWishlist = useStore((s) => s.removeFromWishlist);
   const wishlistToCart = useStore((s) => s.wishlistToCart);
   const openProduct = useStore((s) => s.openProduct);
+  const productMap = useProductsStore((s) => s.productMap);
 
   useEffect(() => {
     if (!open) return;

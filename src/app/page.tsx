@@ -24,15 +24,16 @@ import { LocationModal } from "@/components/karto/location-modal";
 import { CategoriesDrawer } from "@/components/karto/categories-drawer";
 import { ErrorBoundary } from "@/components/karto/error-boundary";
 import { useStore } from "@/components/karto/store";
-import { products } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 
 export default function Home() {
   const view = useStore((s) => s.view);
+  const products = useProductsStore((s) => s.products);
 
-  const featured = useMemo(() => products.filter((p) => p.isFeatured), []);
-  const bestSellers = useMemo(() => products.filter((p) => p.isBestSeller), []);
-  const newArrivals = useMemo(() => products.filter((p) => p.isNew), []);
-  const todaysOffers = useMemo(() => products.filter((p) => p.mrp > p.price).sort((a, b) => (b.mrp - b.price) - (a.mrp - a.price)).slice(0, 10), []);
+  const featured = useMemo(() => products.filter((p) => p.isFeatured), [products]);
+  const bestSellers = useMemo(() => products.filter((p) => p.isBestSeller), [products]);
+  const newArrivals = useMemo(() => products.filter((p) => p.isNew), [products]);
+  const todaysOffers = useMemo(() => products.filter((p) => p.mrp > p.price).sort((a, b) => (b.mrp - b.price) - (a.mrp - a.price)).slice(0, 10), [products]);
 
   return (
     <div className="flex min-h-screen flex-col">

@@ -6,7 +6,8 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useStore, cartTotals } from "@/components/karto/store";
-import { productMap, discountPct } from "@/data/products";
+import { discountPct, type Product } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { coupons } from "@/data/extras";
 import { ProductImage } from "@/components/karto/primitives";
 import { formatPrice, FREE_DELIVERY_THRESHOLD } from "@/lib/format";
@@ -29,6 +30,7 @@ export function CartDrawer() {
   const setAuthOpen = useStore((s) => s.setAuthOpen);
   const totals = useStore(useShallow(cartTotals));
   const hydrated = useHydrated();
+  const productMap = useProductsStore((s) => s.productMap);
 
   useEffect(() => {
     if (!open) return;

@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Karto Prisma schema — SQLite database for products, users, orders, addresses.
 
 generator client {
   provider = "prisma-client-js"
@@ -14,19 +10,124 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String         @id @default(cuid())
+  email        String         @unique
+  name         String
+  phone        String?
+  passwordHash String
+  role         String         @default("user") // "user" | "admin"
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  addresses    Address[]
+  orders       Order[]
+  wishlist     WishlistItem[]
+  cartItems    CartItem[]
 }
 
-model Post {
+model Product {
+  id           String       @id @default(cuid())
+  name         String
+  brand        String
+  category     String
+  price        Float
+  mrp          Float
+  rating       Float        @default(4.0)
+  reviews      Int          @default(0)
+  deliveryMins Int          @default(15)
+  inStock      Boolean      @default(true)
+  stockCount   Int          @default(50)
+  unit         String
+  emoji        String       @default("📦")
+  gradient     String       @default("from-muted to-muted/50")
+  description  String
+  tags         String       @default("") // comma-separated
+  image        String?
+  isNew        Boolean      @default(false)
+  isBestSeller Boolean      @default(false)
+  isFlashSale  Boolean      @default(false)
+  isFeatured   Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Address {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName  String
+  phone     String
+  altPhone String?
+  house     String
+  street    String
+  area      String
+  landmark  String?
+  city      String
+  state     String
+  pincode   String
+  type      String   @default("Home") // "Home" | "Work" | "Other"
   createdAt DateTime @default(now())
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shortId       String      // human-friendly KTO-XXXX-XXXX
+  subtotal      Float
+  tax           Float
+  delivery      Float
+  discount      Float
+  total         Float
+  addressJson   String      // snapshot of address at order time (JSON)
+  slot          String
+  paymentMethod String
+  paymentLabel  String
+  status        String      @default("Placed") // Placed | Confirmed | Out for Delivery | Delivered | Cancelled
+  etaMins       Int         @default(15)
+  placedAt      DateTime    @default(now())
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  name      String
+  price     Float
+  qty       Int
+  emoji     String  @default("📦")
+  gradient  String  @default("")
+  unit      String  @default("")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model CartItem {
+  id        String @id @default(cuid())
+  userId    String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  qty       Int
   updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
 }

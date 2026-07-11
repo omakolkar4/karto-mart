@@ -206,3 +206,85 @@ Stage Summary:
 - Hero cleaned up (no redundant search/detect — those are in navbar).
 - Cart quantity selector no longer auto-opens product modal.
 - Out-of-stock products show "Notify Me" instead of allowing add to cart.
+
+---
+Task ID: DB-FRONTEND
+Agent: Sub-agent (general-purpose)
+Task: Migrate React components to use the live database-backed products store (`useProductsStore` from `src/lib/products-store.ts`) instead of static imports from `@/data/products`.
+
+Work Log:
+- Read worklog.md and products-store.ts to understand prior work and the store API (`useProductsStore` with `products`/`productMap` + `useProductById` hook; store seeds with static data then fetches from `/api/products`).
+- Updated 11 component files. For each, replaced the static `products` / `productMap` import with a `useProductsStore` selector hook call inside the component. Kept all other imports (formatPrice, analytics, cn, lucide icons, framer-motion, useStore, categories, etc.) and all JSX/styling exactly as-is.
+
+Per-file changes:
+1. src/components/karto/hero.tsx — replaced `import { products } from "@/data/products"` with `useProductsStore`; added `const products = useProductsStore((s) => s.products);` inside Hero.
+2. src/components/karto/flash-sale.tsx — same pattern inside FlashSale.
+3. src/components/karto/category-page.tsx — same pattern inside CategoryPage (kept `categoryMap`/`categories` from `@/data/categories`).
+4. src/components/karto/search-modal.tsx — same pattern inside SearchModal.
+5. src/app/page.tsx — replaced static `products` import with `useProductsStore`; added `const products = useProductsStore((s) => s.products);` inside Home (before the useMemo calls).
+6. src/components/karto/cart-drawer.tsx — replaced `import { productMap, discountPct }` with `import { discountPct, type Product }` from `@/data/products` + `useProductsStore`; added `const productMap = useProductsStore((s) => s.productMap);` inside CartDrawer.
+7. src/components/karto/wishlist-drawer.tsx — same pattern as cart-drawer.
+8. src/components/karto/checkout-modal.tsx — replaced `import { productMap }` with `useProductsStore`; added `const productMap = useProductsStore((s) => s.productMap);` inside CheckoutModal.
+9. src/components/karto/account-modal.tsx — same pattern inside AccountModal.
+10. src/components/karto/product-modal.tsx — replaced `import { getProductById, getRelatedProducts, getFrequentlyBought, discountPct }` with `import { discountPct, type Product }` + `useProductsStore`. Inside ProductModal added `const products = useProductsStore((s) => s.products);` and `const productMap = useProductsStore((s) => s.productMap);`. Replaced `getProductById(id)` → `productMap[id]`. Replaced `getRelatedProducts(product, 6)` → inline `products.filter((x) => x.category === product.category && x.id !== product.id).slice(0, 6)`. Replaced `getFrequentlyBought(product, 3)` → inline `products.filter((x) => x.id !== product.id && x.category !== product.category && x.isBestSeller).slice(0, 3)` (no Math.random to avoid hydration issues).
+11. src/components/karto/catalog.tsx — replaced `import { products } from "@/data/products"` with `useProductsStore`; kept the separate `import { brands } from "@/data/products"` line untouched; added hook call inside Catalog.
+
+Lint fix: First `bun run lint` run flagged 11 `react-hooks/preserve-manual-memoization` errors in page.tsx, catalog.tsx, category-page.tsx, search-modal.tsx — the existing useMemo dep arrays didn't include the now-reactive `products` value, so React Compiler couldn't preserve the manual memoization. Added `products` to the dep arrays of the affected useMemo calls (4 in page.tsx, 2 in catalog.tsx, 2 in category-page.tsx, 3 in search-modal.tsx). This is the minimal change needed for the live store to correctly trigger recomputation when DB products load. Also added `products` to the dep arrays of the two new useMemo calls in product-modal.tsx (related + fbt).
+
+Final `bun run lint` → 0 errors. No API routes, products-store.ts, or other files were modified.
+
+Stage Summary:
+- All 11 listed components now read products/productMap from the live `useProductsStore` Zustand store instead of static module imports.
+- The store seeds with static data for instant SSR/initial render and replaces with DB-fetched products from `/api/products` once loaded; components re-render automatically when the store updates (deps arrays updated so useMemo recomputes).
+- Lint passes clean. No JSX, styling, or other logic changed.
+
+---
+Task ID: DB-1
+Agent: Main (Z.ai Code)
+Task: Add real database (Prisma + SQLite) for products, users, orders, addresses with real credential auth.
+
+Work Log:
+- Wrote Prisma schema with models: User (email, passwordHash, role), Product (all fields from static data + stockCount, inStock), Address, Order, OrderItem, ContactMessage, WishlistItem, CartItem. Ran `bun run db:push` to create tables.
+- Installed bcryptjs for password hashing. Wrote src/lib/auth.ts (hashPassword, verifyPassword, createSessionToken, verifySessionToken) using HMAC-signed tokens. Wrote src/lib/session.ts (setSessionCookie, clearSessionCookie, getCurrentUser) using Next.js cookies() API with httpOnly cookies.
+- Wrote scripts/seed.ts to populate 99 products from static data + create admin user (admin@karto.shop / admin123). Ran seed successfully. Added `db:seed` script to package.json.
+- API routes (all under /api):
+  * products/route.ts — GET (list, optional category filter), POST (create, admin only)
+  * products/[id]/route.ts — GET (single), PUT (update stock/price/etc, admin only), DELETE (admin only)
+  * auth/register/route.ts — POST {name, email, phone, password} → bcrypt hash, create user, set session cookie
+  * auth/login/route.ts — POST {email, password} → verify bcrypt hash, set session cookie
+  * auth/logout/route.ts — POST → clear session cookie
+  * auth/me/route.ts — GET → return current user from session
+  * addresses/route.ts — GET (list for user), POST (save new address)
+  * addresses/[id]/route.ts — DELETE (remove address)
+  * orders/route.ts — GET (list user orders), POST (create order — resolves prices from DB, decrements stock, saves order + items)
+  * orders/[id]/route.ts — GET (single order detail)
+  * contact/route.ts — POST (save contact message to DB)
+  * wishlist/route.ts — GET/POST/DELETE (sync wishlist for logged-in users)
+- Frontend: created src/lib/products-store.ts (Zustand store that fetches from /api/products, starts with static data for instant render, replaces with DB data on fetch). Updated StoreProvider to call restoreSession() + fetchProducts() on mount.
+- Updated store.ts: placeOrder is now async — POSTs to /api/orders (saves to DB, server resolves prices, decrements stock). Added loginWithCredentials, signupWithCredentials, logoutApi, restoreSession — all call the real API. Cart calculations now use useProductsStore.getState().productMap (live DB data).
+- AuthModal: submit is now async — calls loginWithCredentials/signupWithCredentials with real email+password. Shows error toast on invalid credentials. Google login still simulated.
+- CheckoutModal: confirmOrder is now async — saves address to DB via /api/addresses, then calls placeOrder (saves order to DB).
+- ContactModal: submit now POSTs to /api/contact (saves message to DB).
+- AccountModal: logout now calls logoutApi (clears server session).
+- Subagent migrated 11 components (hero, flash-sale, category-page, search-modal, page.tsx, cart-drawer, wishlist-drawer, checkout-modal, account-modal, product-modal, catalog) to use useProductsStore instead of static imports.
+- Lint passes clean (0 errors).
+
+Verification (curl + Agent Browser):
+- GET /api/products → 99 products from DB ✅
+- POST /api/auth/register → created user "Test User" with hashed password, returned user + set cookie ✅
+- POST /api/auth/login → verified credentials, returned user ✅
+- GET /api/auth/me → returns logged-in user from cookie ✅
+- POST /api/orders → saved order KTO-0QN5-5ROG to DB (₹397, 1 item), stock auto-decremented from 37→35 ✅
+- POST /api/addresses → saves address for logged-in user ✅
+- POST /api/contact → saves contact message ✅
+- Frontend: products load from DB API on mount, auth uses real credentials, checkout saves to DB.
+
+Database tables: User, Product, Address, Order, OrderItem, ContactMessage, WishlistItem, CartItem
+Admin credentials: admin@karto.shop / admin123
+Seed command: bun run db:seed
+
+Stage Summary:
+- Full database layer added with Prisma + SQLite. Products, users, orders, addresses, contact messages all stored in DB.
+- Real authentication with bcrypt-hashed passwords and httpOnly session cookies.
+- Admin can manage products (add/remove/update stock) via API or directly in the DB.
+- Orders saved to DB with stock auto-decrement. User data persists across sessions.

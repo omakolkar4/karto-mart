@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, SlidersHorizontal, Star } from "lucide-react";
 import { useStore } from "@/components/karto/store";
-import { products } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { categories } from "@/data/categories";
 import { ProductCard } from "@/components/karto/product-card";
 import { analytics } from "@/lib/analytics";
@@ -17,6 +17,7 @@ export function SearchModal() {
   const setOpen = useStore((s) => s.setSearchOpen);
   const initialQuery = useStore((s) => s.searchInitialQuery);
   const openProduct = useStore((s) => s.openProduct);
+  const products = useProductsStore((s) => s.products);
 
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
@@ -51,7 +52,7 @@ export function SearchModal() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, setOpen]);
 
-  const allBrands = useMemo(() => Array.from(new Set(products.map((p) => p.brand))).sort(), []);
+  const allBrands = useMemo(() => Array.from(new Set(products.map((p) => p.brand))).sort(), [products]);
 
   const suggestions = useMemo(() => {
     if (!q.trim()) return [];
@@ -60,7 +61,7 @@ export function SearchModal() {
       products.filter((p) => p.name.toLowerCase().includes(lower) || p.brand.toLowerCase().includes(lower) || p.tags.some((t) => t.includes(lower)))
         .map((p) => p.name)
     )).slice(0, 6);
-  }, [q]);
+  }, [q, products]);
 
   const results = useMemo(() => {
     const lower = q.toLowerCase().trim();
@@ -77,7 +78,7 @@ export function SearchModal() {
     else if (sort === "rating") list = list.sort((a, b) => b.rating - a.rating);
     else list = list.sort((a, b) => b.reviews - a.reviews);
     return list;
-  }, [q, cat, brand, maxPrice, minRating, sort]);
+  }, [q, cat, brand, maxPrice, minRating, sort, products]);
 
   return (
     <AnimatePresence>

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Zap, Clock, ShieldCheck, TrendingUp, Star, ArrowRight } from "lucide-react";
 import { useStore } from "@/components/karto/store";
-import { products } from "@/data/products";
+import { useProductsStore } from "@/lib/products-store";
 import { categoryImages } from "@/data/image-map";
 import { categories } from "@/data/categories";
 import { formatPrice } from "@/lib/format";
@@ -12,6 +12,7 @@ import { analytics } from "@/lib/analytics";
 export function Hero() {
   const navigateToCategory = useStore((s) => s.navigateToCategory);
   const openProduct = useStore((s) => s.openProduct);
+  const products = useProductsStore((s) => s.products);
 
   // 4 category tiles for the right grid
   const catTiles = (["fruits", "dairy", "snacks", "bakery"] as const)
