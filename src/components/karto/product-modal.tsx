@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Heart, ShoppingCart, Zap, Minus, Plus, Star, Truck, ShieldCheck, RotateCcw,
-  Check, ChevronRight,
+  X, Heart, ShoppingCart, Zap, Star, Truck, ShieldCheck, RotateCcw,
+  Check, ChevronRight, Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/components/karto/store";
@@ -25,6 +25,8 @@ export function ProductModal() {
   const decQty = useStore((s) => s.decQty);
   const wishlist = useStore((s) => s.wishlist);
   const toggleWishlist = useStore((s) => s.toggleWishlist);
+  const notifiedProducts = useStore((s) => s.notifiedProducts);
+  const toggleNotify = useStore((s) => s.toggleNotify);
   const setCartOpen = useStore((s) => s.setCartOpen);
   const setCheckoutOpen = useStore((s) => s.setCheckoutOpen);
   const user = useStore((s) => s.user);
@@ -35,7 +37,14 @@ export function ProductModal() {
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<"desc" | "specs" | "reviews">("desc");
 
+  // Reset local qty + tab when switching to a different product
+  useEffect(() => {
+    setQty(1);
+    setTab("desc");
+  }, [id]);
+
   const product = id ? productMap[id] : null;
+  const notified = product ? notifiedProducts.includes(product.id) : false;
   const related = useMemo(() => (product ? products.filter((x) => x.category === product.category && x.id !== product.id).slice(0, 6) : []), [product, products]);
   const fbt = useMemo(() => (product ? products.filter((x) => x.id !== product.id && x.category !== product.category && x.isBestSeller).slice(0, 3) : []), [product, products, id]);
 
@@ -43,7 +52,7 @@ export function ProductModal() {
   const close = () => setId(null);
 
   const buyNow = () => {
-    if (!product) return;
+    if (!product || !product.inStock) return;
     addToCart(product, qty);
     analytics.addToCart(product.id, product.price);
     close();
@@ -148,26 +157,65 @@ export function ProductModal() {
                 </div>
 
                 {/* quantity + actions */}
-                <div className="mt-5 flex items-center gap-3">
-                  <QuantitySelector qty={cartQty > 0 ? cartQty : qty} onInc={() => (cartQty > 0 ? incQty(product.id) : setQty((q) => q + 1))} onDec={() => (cartQty > 0 ? decQty(product.id) : setQty((q) => Math.max(1, q - 1)))} />
-                  <span className="text-sm text-muted-foreground">{cartQty > 0 ? `${cartQty} in cart` : ""}</span>
-                </div>
+                {product.inStock ? (
+                  <div className="mt-5 flex items-center gap-3">
+                    {cartQty > 0 ? (
+                      <>
+                        <QuantitySelector qty={cartQty} onInc={() => incQty(product.id)} onDec={() => decQty(product.id)} />
+                        <span className="text-sm font-medium text-karto-green">{cartQty} in cart</span>
+                      </>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">Click "Add to Cart" to add 1 item</span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-5 flex items-center gap-3">
+                    <span className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-2 text-sm font-bold text-red-600 dark:bg-red-950/30 dark:text-red-400">
+                      <X className="h-4 w-4" /> Out of stock
+                    </span>
+                  </div>
+                )}
 
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                  <button
-                    onClick={() => { addToCart(product, qty); analytics.addToCart(product.id, product.price); toast.success("Added to cart", { description: product.name }); }}
-                    disabled={!product.inStock}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-full border-2 border-karto-green py-3 text-sm font-bold text-karto-green transition hover:bg-karto-green/10 disabled:opacity-50"
-                  >
-                    <ShoppingCart className="h-4 w-4" /> Add to Cart
-                  </button>
-                  <button
-                    onClick={buyNow}
-                    disabled={!product.inStock}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-karto-green py-3 text-sm font-bold text-white transition hover:bg-karto-green/90 disabled:opacity-50"
-                  >
-                    <Zap className="h-4 w-4 fill-white" /> Buy Now
-                  </button>
+                  {product.inStock ? (
+                    <>
+                      {cartQty > 0 ? (
+                        <button
+                          onClick={() => { setCartOpen(true); close(); }}
+                          className="flex flex-1 items-center justify-center gap-2 rounded-full border-2 border-karto-green py-3 text-sm font-bold text-karto-green transition hover:bg-karto-green/10"
+                        >
+                          <ShoppingCart className="h-4 w-4" /> View Cart
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => { addToCart(product, 1); analytics.addToCart(product.id, product.price); toast.success("Added to cart", { description: product.name }); }}
+                          className="flex flex-1 items-center justify-center gap-2 rounded-full border-2 border-karto-green py-3 text-sm font-bold text-karto-green transition hover:bg-karto-green/10"
+                        >
+                          <ShoppingCart className="h-4 w-4" /> Add to Cart
+                        </button>
+                      )}
+                      <button
+                        onClick={buyNow}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-full bg-karto-green py-3 text-sm font-bold text-white transition hover:bg-karto-green/90"
+                      >
+                        <Zap className="h-4 w-4 fill-white" /> Buy Now
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        toggleNotify(product.id);
+                        if (!notified) toast.success("We'll notify you!", { description: `You'll get an alert when ${product.name} is back in stock.` });
+                        else toast("Notification removed");
+                      }}
+                      className={cn(
+                        "flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-sm font-bold transition",
+                        notified ? "bg-karto-green/10 text-karto-green" : "bg-amber-400 text-amber-950 hover:bg-amber-500"
+                      )}
+                    >
+                      <Bell className="h-4 w-4" /> {notified ? "Notified ✓" : "Notify Me"}
+                    </button>
+                  )}
                   <button
                     onClick={() => { toggleWishlist(product.id); if (!wishlist.includes(product.id)) { analytics.wishlist(product.id); toast.success("Added to wishlist"); } }}
                     className={cn("flex h-12 w-12 items-center justify-center rounded-full border border-border transition hover:border-red-400", wishlist.includes(product.id) ? "text-red-500" : "text-muted-foreground")}

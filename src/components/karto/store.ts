@@ -213,6 +213,8 @@ export const useStore = create<StoreState>()(
       },
 
       addToCart: (product, qty = 1) => {
+        // Block adding out-of-stock products to cart
+        if (!product.inStock) return;
         const cart = [...get().cart];
         const idx = cart.findIndex((i) => i.productId === product.id);
         if (idx >= 0) cart[idx] = { ...cart[idx], qty: cart[idx].qty + qty };

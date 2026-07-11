@@ -288,3 +288,33 @@ Stage Summary:
 - Real authentication with bcrypt-hashed passwords and httpOnly session cookies.
 - Admin can manage products (add/remove/update stock) via API or directly in the DB.
 - Orders saved to DB with stock auto-decrement. User data persists across sessions.
+
+---
+Task ID: FIX-CART-STOCK
+Agent: Main (Z.ai Code)
+Task: Fix out-of-stock products being added to cart + wrong quantity showing when switching products in modal.
+
+Work Log:
+- Issue 1: Out-of-stock products could be added to cart from the product modal (Add to Cart / Buy Now didn't properly block).
+  Fix: Added `if (!product.inStock) return;` guard in the store's `addToCart` function — blocks at the data layer, so no component can add out-of-stock products regardless of UI.
+- Issue 2: The product modal had a local `qty` state that didn't reset when switching products. Adding 5 of product A, then opening product B would show qty 5 on product B. Also, the modal always showed a quantity selector even for products not in the cart.
+  Fix: 
+  * Added `useEffect` that resets `qty` to 1 when the product ID changes.
+  * Rewrote the modal's quantity + actions section to match the product card behavior:
+    - In stock + NOT in cart → shows "Click Add to Cart" text + "Add to Cart" button (adds exactly 1)
+    - In stock + IN cart → shows quantity selector with cart qty + "View Cart" button
+    - Out of stock → shows "Out of stock" badge + "Notify Me" button (no Add to Cart, no Buy Now, no quantity selector)
+  * `buyNow` now checks `product.inStock` before proceeding.
+  * Removed unused Minus/Plus icon imports.
+- Agent Browser verified:
+  * Out-of-stock product card shows "Notify" button (not ADD).
+  * Out-of-stock product modal shows "Notify Me" button (no Add to Cart / Buy Now).
+  * Store blocks adding out-of-stock products to cart (cart only contains in-stock items).
+  * Opening a different product's modal shows "Add to Cart" (not the quantity from the previous product).
+  * Clicking "Add to Cart" adds 1, then modal switches to show "View Cart" + quantity selector with qty 1.
+  * No console errors. Lint passes clean.
+
+Stage Summary:
+- Out-of-stock products can no longer be added to cart (blocked at store level + UI level).
+- Product modal quantity resets when switching products (no stale qty from previous product).
+- Modal flow: Add to Cart (adds 1) → View Cart + +/- selector → plus adds more, minus removes.
