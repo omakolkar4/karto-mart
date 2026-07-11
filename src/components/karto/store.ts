@@ -144,7 +144,7 @@ type StoreState = UIState & {
   removeAddress: (id: string) => void;
 
   // orders
-  placeOrder: (data: { address: Address; slot: string; paymentMethod: string; paymentLabel: string }) => Promise<Order | null>;
+  placeOrder: (data: { address: Address; slot: string; paymentMethod: string; paymentLabel: string }) => Promise<{ order: Order | null; error?: string }>;
   cancelOrder: (orderId: string) => void;
   reorder: (orderId: string) => void;
 };
@@ -313,7 +313,14 @@ export const useStore = create<StoreState>()(
         try {
           const res = await fetch("/api/auth/me");
           const data = await res.json();
-          if (data.user) set({ user: data.user });
+          if (data.user) {
+            // Real server session — sync the local store
+            set({ user: data.user });
+          } else {
+            // No server session — clear any stale local-only user (e.g. old simulated logins)
+            // so checkout doesn't think the user is logged in when the server doesn't.
+            if (get().user) set({ user: null });
+          }
         } catch { /* ignore */ }
       },
 
@@ -342,7 +349,14 @@ export const useStore = create<StoreState>()(
               ) : 0,
             }),
           });
-          if (!res.ok) throw new Error("Order failed");
+          if (!res.ok) {
+            if (res.status === 401) {
+              // Session expired or not logged in on the server — clear stale local user
+              set({ user: null });
+              throw new Error("Please login to place your order");
+            }
+            throw new Error("Order failed");
+          }
           const dbOrder = await res.json();
           const order = dbOrder.order;
           // Convert DB order shape to local Order type
@@ -378,9 +392,9 @@ export const useStore = create<StoreState>()(
             cartOpen: false,
             checkoutOpen: false,
           });
-          return localOrder;
-        } catch {
-          return null;
+          return { order: localOrder };
+        } catch (err) {
+          return { order: null, error: err instanceof Error ? err.message : "Could not place order" };
         }
       },
 

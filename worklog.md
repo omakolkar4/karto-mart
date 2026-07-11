@@ -379,3 +379,24 @@ Work Log:
 Stage Summary:
 - Location: asks for permission ONCE (via browser prompt only if state is "prompt"). On denial, never auto-retries, shows no default location — user must manually set it from the header.
 - Dark mode: hero image now has a 60% black tint so it blends with the dark theme (no more white block).
+
+---
+Task ID: FIX-ORDER-401
+Agent: Main (Z.ai Code)
+Task: Fix "Could not place order" error caused by stale local user / no server session.
+
+Work Log:
+- Root cause: The order API (POST /api/orders) requires authentication (returns 401 if not logged in). But the user had a stale local user in localStorage (from old simulated Google login) that the server didn't recognize. The store's `restoreSession` only SET the user if the server returned one — it didn't CLEAR the local user if the server said no session. So the cart drawer's `if (!user)` check passed, but the order API rejected the request with 401.
+- Fix 1: Updated `restoreSession` in store.ts — now if the server returns no user (no session), it CLEARS any stale local user (`if (get().user) set({ user: null })`). This ensures the local store always matches the server's auth state.
+- Fix 2: Updated `placeOrder` in store.ts — now returns `{ order, error }` instead of just `Order | null`. On 401 from the order API, it clears the stale user and throws "Please login to place your order".
+- Fix 3: Updated `confirmOrder` in checkout-modal.tsx — handles the new return type. If the error message contains "login", it closes the checkout modal and opens the auth modal so the user can log in properly.
+- The cart drawer's checkout button already checked `if (!user)` — now that restoreSession clears stale users, this check works correctly and prompts login when needed.
+- Verified via curl: cookie is set correctly (karto_session, httpOnly), login returns user, order API works with cookie (placed test order KTO-M35I-SKOR successfully).
+- Agent Browser verified: stale local user is cleared on reload, cart drawer shows "Please login to continue" and opens auth modal when no real session exists.
+- Lint passes clean (0 errors).
+
+Stage Summary:
+- The "Could not place order" error is fixed. Root cause was stale local user bypassing the login check.
+- restoreSession now syncs local user with server session (clears stale users).
+- placeOrder returns error messages; checkout modal opens auth modal if login is required.
+- Orders save correctly to the database for properly authenticated users.

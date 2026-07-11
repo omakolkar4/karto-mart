@@ -119,15 +119,21 @@ export function CheckoutModal() {
       });
     } catch { /* non-critical */ }
     // Place the order (saves to DB via API)
-    const order = await placeOrder({ address: addr, slot: `${slotObj.label} (${slotObj.time})`, paymentMethod: payment, paymentLabel: payLabel });
+    const result = await placeOrder({ address: addr, slot: `${slotObj.label} (${slotObj.time})`, paymentMethod: payment, paymentLabel: payLabel });
     setPlacing(false);
-    if (order) {
-      analytics.purchaseCompleted(order.id, order.total);
-      setLastOrder(order);
-      toast.success("Order placed successfully! 🎉", { description: `Order ${order.id}` });
+    if (result.order) {
+      analytics.purchaseCompleted(result.order.id, result.order.total);
+      setLastOrder(result.order);
+      toast.success("Order placed successfully! 🎉", { description: `Order ${result.order.id}` });
       close();
     } else {
-      toast.error("Could not place order", { description: "Please try again." });
+      const errMsg = result.error || "Could not place order";
+      toast.error(errMsg, { description: "Please try again." });
+      // If login is required, close checkout and open the auth modal
+      if (errMsg.toLowerCase().includes("login")) {
+        close();
+        setAuthOpen(true);
+      }
     }
   };
 
