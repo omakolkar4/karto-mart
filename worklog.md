@@ -419,3 +419,35 @@ Work Log:
 Stage Summary:
 - Dashboard is shorter: removed Why Karto, Reviews, Download App, Newsletter sections.
 - Enhanced CSS on BestDeals (glow shadows, animated circles), Brands (gradient bg, wider fades), Stats (gradient + icons + blur blobs), Offers (ticket-style perforations, animated circles).
+
+---
+Task ID: FOOTER-NAVBAR-CSS
+Agent: Main (Z.ai Code)
+Task: Make footer compact (remove redundant sections) + update address/phone + enhance navbar category CSS.
+
+Work Log:
+- Footer: rewrote to be compact:
+  * Removed the newsletter CTA strip (top section with "Get exclusive deals & updates").
+  * Removed the long description paragraph ("Your everyday shopping partner. Fresh groceries...").
+  * Merged Company + Help into a single "Company" column (Offers, Flash Sale, Contact, All Products, FAQs).
+  * Kept Shop column (6 categories) + brand/contact column.
+  * Updated address to "MIT ADT University, Pune, Maharashtra 412201".
+  * Updated phone to "+91-8208363925".
+  * Kept email (support@karto.shop) and social icons.
+  * Footer is now ~40% shorter (4 columns → brand+contact spanning 2, Shop, Company).
+- Navbar category strip: enhanced CSS:
+  * Background: subtle gradient (from-background to-muted/30).
+  * Tiles: rounded-xl (was rounded-full), px-3 py-1.5 (was px-2.5 py-1), gap-1 (was gap-0.5), text-xs font-semibold (was font-medium).
+  * Active state: solid karto-green background with white text + shadow-sm (was light green tint).
+  * Hover: bg-card + shadow-sm lift (was bg-muted).
+  * Emoji: text-base (was text-sm) with scale-125 on hover for a playful pop effect.
+  * Added group + transition-all for smooth interactions.
+- Agent Browser verified:
+  * Footer: MIT ADT University address ✓, +91-8208363925 phone ✓, no newsletter CTA ✓, no long description ✓, no redundant columns ✓.
+  * Navbar: VLM confirmed "rounded tiles, green active state, hover effects, larger emojis. Visually appealing and premium."
+  * Footer: VLM confirmed "compact, shows MIT ADT University address and phone number, clean layout."
+  * No console errors. Lint passes clean.
+
+Stage Summary:
+- Footer is now compact with MIT ADT University Pune address + +91-8208363925 phone. Removed newsletter CTA, long description, and redundant Company/Help columns.
+- Navbar category strip enhanced: rounded tiles, solid green active state, hover lift + shadow, larger emoji with scale on hover, gradient background.

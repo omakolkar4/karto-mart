@@ -192,24 +192,27 @@ export function Header() {
           </div>
         </div>
 
-        {/* category nav — horizontally scrollable, compact */}
-        <nav className="hide-scrollbar hidden border-t border-border md:block">
-          <div className="mx-auto flex max-w-7xl items-center gap-0.5 overflow-x-auto px-4 py-1">
-            {categories.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => handleCategoryClick(c.id)}
-                className={cn(
-                  "flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium transition",
-                  view === "category" && activeCategory === c.id
-                    ? "bg-karto-green/10 text-karto-green"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                <span className="text-sm">{c.emoji}</span>
-                {c.short}
-              </button>
-            ))}
+        {/* category nav — horizontally scrollable, compact, premium tiles */}
+        <nav className="hide-scrollbar hidden border-t border-border bg-gradient-to-b from-background to-muted/30 md:block">
+          <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-2">
+            {categories.map((c) => {
+              const isActive = view === "category" && activeCategory === c.id;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => handleCategoryClick(c.id)}
+                  className={cn(
+                    "group flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-semibold transition-all",
+                    isActive
+                      ? "bg-karto-green text-white shadow-sm"
+                      : "text-muted-foreground hover:bg-card hover:text-foreground hover:shadow-sm"
+                  )}
+                >
+                  <span className={cn("text-base transition-transform duration-200", !isActive && "group-hover:scale-125")}>{c.emoji}</span>
+                  {c.short}
+                </button>
+              );
+            })}
           </div>
         </nav>
       </header>
