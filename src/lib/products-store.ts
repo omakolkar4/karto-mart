@@ -26,7 +26,13 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
       const res = await fetch("/api/products");
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
-      const products: Product[] = data.products || [];
+      const products: Product[] = Array.isArray(data.products) ? data.products : [];
+
+      if (products.length === 0) {
+        set({ loading: false, loaded: true });
+        return;
+      }
+
       const productMap: Record<string, Product> = {};
       for (const p of products) productMap[p.id] = p;
       set({ products, productMap, loading: false, loaded: true });

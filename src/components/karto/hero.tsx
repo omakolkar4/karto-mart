@@ -19,7 +19,7 @@ export function Hero() {
     .map((id) => categories.find((c) => c.id === id)!)
     .filter(Boolean);
 
-  const trending = [products[0], products[18]];
+  const trending = [products[0], products[18]].filter((p): p is (typeof products)[number] => Boolean(p));
 
   return (
     <section className="relative overflow-hidden border-b border-border bg-foreground text-background">
