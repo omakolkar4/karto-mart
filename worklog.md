@@ -400,3 +400,22 @@ Stage Summary:
 - restoreSession now syncs local user with server session (clears stale users).
 - placeOrder returns error messages; checkout modal opens auth modal if login is required.
 - Orders save correctly to the database for properly authenticated users.
+
+---
+Task ID: CLEANUP-SECTIONS
+Agent: Main (Z.ai Code)
+Task: Remove 4 long sections (Why Karto, Reviews, Download App, Newsletter) + enhance CSS of remaining sections.
+
+Work Log:
+- Removed from page.tsx: WhyChooseUs, Reviews, DownloadApp, Newsletter. Dashboard is now shorter and more focused.
+- Enhanced BestDeals: added colored glow shadows per card (shadow-red-500/30 etc.), two decorative circles that scale on hover, icon rotates + scales on hover, scale + tap animations, backdrop-blur on coupon code badge.
+- Enhanced Brands: gradient background (from-muted/30 to-card), wider fade gradients (w-20), wider letter spacing (tracking-[0.2em]), shadow-sm on pills with hover border-karto-green/40 + hover shadow-md.
+- Enhanced Stats: gradient background (from-karto-green to-emerald-600), decorative blur blobs, shadow-xl, each stat now has an icon in a glass circle (bg-white/15 backdrop-blur), scale-in animation per stat, rounded-3xl.
+- Enhanced Offers: added Tag icon in header, perforated ticket-style circles on left/right edges (bg-background cutouts), two decorative circles that scale on hover, shadow-lg with hover:shadow-xl, backdrop-blur on coupon code, scale + hover animations, hover:shadow-md on apply button.
+- Agent Browser verified: all 4 sections removed (confirmed false for each), no console errors.
+- VLM confirmed: sections look premium with good CSS — gradients, shadows, decorative elements, cohesive color palette.
+- Lint passes clean (0 errors).
+
+Stage Summary:
+- Dashboard is shorter: removed Why Karto, Reviews, Download App, Newsletter sections.
+- Enhanced CSS on BestDeals (glow shadows, animated circles), Brands (gradient bg, wider fades), Stats (gradient + icons + blur blobs), Offers (ticket-style perforations, animated circles).

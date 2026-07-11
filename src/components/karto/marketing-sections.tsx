@@ -13,10 +13,10 @@ import { Stars } from "@/components/karto/primitives";
 export function BestDeals() {
   const applyCoupon = useStore((s) => s.applyCoupon);
   const deals = [
-    { icon: Zap, title: "Flash Sale", sub: "Up to 50% off", color: "from-red-500 to-rose-600", code: "KARTO50" },
-    { icon: Gift, title: "First Order", sub: "₹100 off above ₹599", color: "from-emerald-500 to-green-600", code: "FRESH100" },
-    { icon: Percent, title: "Weekend Special", sub: "15% off up to ₹200", color: "from-amber-500 to-orange-600", code: "WEEKEND15" },
-    { icon: Truck, title: "Free Delivery", sub: "On orders ₹199+", color: "from-sky-500 to-cyan-600", code: null },
+    { icon: Zap, title: "Flash Sale", sub: "Up to 50% off", color: "from-red-500 to-rose-600", glow: "shadow-red-500/30", code: "KARTO50" },
+    { icon: Gift, title: "First Order", sub: "₹100 off above ₹599", color: "from-emerald-500 to-green-600", glow: "shadow-emerald-500/30", code: "FRESH100" },
+    { icon: Percent, title: "Weekend Special", sub: "15% off up to ₹200", color: "from-amber-500 to-orange-600", glow: "shadow-amber-500/30", code: "WEEKEND15" },
+    { icon: Truck, title: "Free Delivery", sub: "On orders ₹199+", color: "from-sky-500 to-cyan-600", glow: "shadow-sky-500/30", code: null },
   ];
   return (
     <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
@@ -27,7 +27,8 @@ export function BestDeals() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: i * 0.06 }}
-            whileHover={{ y: -3 }}
+            whileHover={{ y: -4, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => {
               if (d.code) {
                 const c = coupons.find((x) => x.code === d.code);
@@ -40,20 +41,22 @@ export function BestDeals() {
                 document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
               }
             }}
-            className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${d.color} p-4 text-left text-white shadow-lg`}
+            className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${d.color} p-4 text-left text-white shadow-lg ${d.glow} transition-shadow hover:shadow-xl`}
           >
-            <div className="absolute -right-5 -top-5 h-16 w-16 rounded-full bg-white/15 transition group-hover:scale-125" />
+            {/* decorative circles */}
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15 transition-transform duration-500 group-hover:scale-150" />
+            <div className="absolute -bottom-6 -left-6 h-16 w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-125" />
             <div className="relative flex items-center gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
-                <d.icon className="h-5 w-5" />
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/25 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+                <d.icon className="h-6 w-6" />
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-black">{d.title}</p>
+                <p className="truncate text-sm font-black tracking-tight">{d.title}</p>
                 <p className="truncate text-xs text-white/85">{d.sub}</p>
               </div>
             </div>
             {d.code && (
-              <span className="absolute bottom-2 right-2 rounded-md border border-dashed border-white/60 bg-white/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider">
+              <span className="absolute bottom-2 right-2 rounded-md border border-dashed border-white/70 bg-white/20 px-1.5 py-0.5 text-[9px] font-bold tracking-wider backdrop-blur-sm transition group-hover:bg-white/30">
                 {d.code}
               </span>
             )}
@@ -68,9 +71,9 @@ export function BestDeals() {
 export function Brands() {
   const list = [...popularBrands, ...popularBrands];
   return (
-    <section className="border-y border-border bg-card py-8">
-      <div className="mx-auto mb-5 max-w-7xl px-4 sm:px-6">
-        <p className="text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
+    <section className="border-y border-border bg-gradient-to-b from-muted/30 to-card py-7">
+      <div className="mx-auto mb-4 max-w-7xl px-4 sm:px-6">
+        <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
           Trusted brands you love
         </p>
       </div>
@@ -79,14 +82,14 @@ export function Brands() {
           {list.map((b, i) => (
             <div
               key={i}
-              className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold"
+              className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold shadow-sm transition hover:border-karto-green/40 hover:shadow-md"
             >
               <span className="text-xl">{b.emoji}</span> {b.name}
             </div>
           ))}
         </div>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-card to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-card to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-card to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-card to-transparent" />
       </div>
     </section>
   );
@@ -139,20 +142,35 @@ export function WhyChooseUs() {
 /* ---------------- Stats ---------------- */
 export function Stats() {
   const stats = [
-    { value: "10 min", label: "Average delivery" },
-    { value: "1000+", label: "Products" },
-    { value: "5L+", label: "Happy customers" },
-    { value: "4.8★", label: "Average rating" },
+    { value: "10 min", label: "Average delivery", icon: Clock },
+    { value: "1000+", label: "Products", icon: Tag },
+    { value: "5L+", label: "Happy customers", icon: ShieldCheck },
+    { value: "4.8★", label: "Average rating", icon: Star },
   ];
   return (
     <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      <div className="grid grid-cols-2 gap-3 rounded-3xl bg-karto-green p-6 text-white sm:grid-cols-4 sm:p-8">
-        {stats.map((s) => (
-          <div key={s.label} className="text-center">
-            <p className="text-3xl font-black sm:text-4xl">{s.value}</p>
-            <p className="mt-1 text-xs font-medium text-white/80 sm:text-sm">{s.label}</p>
-          </div>
-        ))}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-karto-green to-emerald-600 p-6 text-white shadow-xl sm:p-8">
+        {/* decorative blobs */}
+        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+        <div className="relative grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              className="flex flex-col items-center text-center"
+            >
+              <span className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm">
+                <s.icon className="h-5 w-5" />
+              </span>
+              <p className="text-2xl font-black sm:text-3xl">{s.value}</p>
+              <p className="mt-0.5 text-xs font-medium text-white/80 sm:text-sm">{s.label}</p>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -211,9 +229,12 @@ export function Offers() {
   const applyCoupon = useStore((s) => s.applyCoupon);
   return (
     <section id="offers" className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <div className="mb-5">
-        <p className="mb-1 text-xs font-bold uppercase tracking-wider text-karto-green">Save more</p>
-        <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Today&apos;s offers & coupons</h2>
+      <div className="mb-5 flex items-end justify-between">
+        <div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-wider text-karto-green">Save more</p>
+          <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Today&apos;s offers & coupons</h2>
+        </div>
+        <Tag className="hidden h-8 w-8 text-karto-green sm:block" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {coupons.map((c, i) => (
@@ -223,25 +244,33 @@ export function Offers() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.35, delay: i * 0.05 }}
-            className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${c.color} p-5 text-white`}
+            whileHover={{ y: -4 }}
+            className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${c.color} p-5 text-white shadow-lg transition-shadow hover:shadow-xl`}
           >
-            <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/15" />
-            <p className="text-2xl font-black">{c.title}</p>
-            <p className="mt-1 text-sm text-white/90">{c.description}</p>
-            <div className="mt-4 flex items-center justify-between">
-              <code className="rounded-lg border border-dashed border-white/60 bg-white/15 px-2.5 py-1 text-sm font-bold tracking-wider">
-                {c.code}
-              </code>
-              <button
-                onClick={() => {
-                  const ok = applyCoupon(c);
-                  if (ok) toast.success("Coupon applied!", { description: `${c.title} — ${c.description}` });
-                  else toast.error("Coupon not applied", { description: `Add items worth ₹${c.minOrder}+ to use this.` });
-                }}
-                className="flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-foreground transition hover:bg-white"
-              >
-                Apply <ChevronRight className="h-3 w-3" />
-              </button>
+            {/* decorative circles */}
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15 transition-transform duration-500 group-hover:scale-125" />
+            <div className="absolute -bottom-6 -left-6 h-16 w-16 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-125" />
+            {/* perforated edge effect */}
+            <div className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 -translate-x-1/2 rounded-full bg-background" />
+            <div className="absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 translate-x-1/2 rounded-full bg-background" />
+            <div className="relative">
+              <p className="text-2xl font-black tracking-tight">{c.title}</p>
+              <p className="mt-1 text-sm text-white/90">{c.description}</p>
+              <div className="mt-4 flex items-center justify-between">
+                <code className="rounded-lg border border-dashed border-white/70 bg-white/20 px-2.5 py-1 text-sm font-bold tracking-wider backdrop-blur-sm">
+                  {c.code}
+                </code>
+                <button
+                  onClick={() => {
+                    const ok = applyCoupon(c);
+                    if (ok) toast.success("Coupon applied!", { description: `${c.title} — ${c.description}` });
+                    else toast.error("Coupon not applied", { description: `Add items worth ₹${c.minOrder}+ to use this.` });
+                  }}
+                  className="flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-foreground transition hover:bg-white hover:shadow-md"
+                >
+                  Apply <ChevronRight className="h-3 w-3" />
+                </button>
+              </div>
             </div>
           </motion.div>
         ))}

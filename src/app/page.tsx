@@ -8,7 +8,7 @@ import { ProductRail } from "@/components/karto/product-rail";
 import { FlashSale } from "@/components/karto/flash-sale";
 import { CategoryPage } from "@/components/karto/category-page";
 import {
-  Brands, WhyChooseUs, Stats, Reviews, Offers, DownloadApp, Newsletter, BestDeals,
+  Brands, Stats, Offers, BestDeals,
 } from "@/components/karto/marketing-sections";
 import { Footer } from "@/components/karto/footer";
 import { CartDrawer } from "@/components/karto/cart-drawer";
@@ -98,11 +98,7 @@ export default function Home() {
               )}
 
               <Brands />
-              <WhyChooseUs />
               <Stats />
-              <Reviews />
-              <DownloadApp />
-              <Newsletter />
             </>
           )}
         </main>
