@@ -1,6 +1,4 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaLibSql } from '@prisma/adapter-libsql'
-import { createClient } from '@libsql/client'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -11,7 +9,10 @@ function createPrismaClient(): PrismaClient {
   const tursoToken = process.env.TURSO_AUTH_TOKEN
 
   // Use Turso (libSQL) adapter when env vars are present (production / Vercel)
-  if (tursoUrl) {
+  if (tursoUrl && tursoUrl !== 'undefined') {
+    // Dynamic import to avoid bundling issues during build
+    const { PrismaLibSql } = require('@prisma/adapter-libsql')
+    const { createClient } = require('@libsql/client')
     const libsql = createClient({
       url: tursoUrl,
       authToken: tursoToken,
